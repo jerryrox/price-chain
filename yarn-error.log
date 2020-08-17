@@ -1,8 +1,8 @@
 Arguments: 
-  /Users/jerrykim/.nvm/versions/node/v10.16.3/bin/node /Users/jerrykim/.yarn/bin/yarn.js init
+  /Users/jerrykim/.nvm/versions/node/v10.16.3/bin/node /Users/jerrykim/.yarn/bin/yarn.js add typescript
 
 PATH: 
-  /Users/jerrykim/.yarn/bin:/Users/jerrykim/.config/yarn/global/node_modules/.bin:/Users/jerrykim/.nvm/versions/node/v10.16.3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/jerrykim/Library/Android/sdk/emulator:/Users/jerrykim/Library/Android/sdk/tools:/Users/jerrykim/Library/Android/sdk/tools/bin:/Users/jerrykim/Library/Android/sdk/platform-tools:/Users/jerrykim/flutter/bin
+  /Users/jerrykim/.yarn/bin:/Users/jerrykim/.config/yarn/global/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/jerrykim/.yarn/bin:/Users/jerrykim/.config/yarn/global/node_modules/.bin:/Users/jerrykim/.nvm/versions/node/v10.16.3/bin:/Users/jerrykim/Library/Android/sdk/emulator:/Users/jerrykim/Library/Android/sdk/tools:/Users/jerrykim/Library/Android/sdk/tools/bin:/Users/jerrykim/Library/Android/sdk/platform-tools:/Users/jerrykim/flutter/bin:/Users/jerrykim/Library/Android/sdk/emulator:/Users/jerrykim/Library/Android/sdk/tools:/Users/jerrykim/Library/Android/sdk/tools/bin:/Users/jerrykim/Library/Android/sdk/platform-tools:/Users/jerrykim/flutter/bin
 
 Yarn version: 
   1.22.4
@@ -14,20 +14,42 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: canceled
-      at Interface.<anonymous> (/Users/jerrykim/.yarn/lib/cli.js:137008:13)
-      at Interface.emit (events.js:198:13)
-      at Interface._ttyWrite (readline.js:801:16)
-      at ReadStream.onkeypress (readline.js:184:10)
-      at ReadStream.emit (events.js:198:13)
-      at emitKeys (internal/readline.js:424:14)
-      at emitKeys.next (<anonymous>)
-      at ReadStream.onData (readline.js:1075:36)
-      at ReadStream.emit (events.js:198:13)
-      at addChunk (_stream_readable.js:288:12)
+  SyntaxError: /Users/jerrykim/Desktop/Uni/_Assignments/Blockchain/price-chain/package.json: Unexpected token } in JSON at position 896
+      at JSON.parse (<anonymous>)
+      at /Users/jerrykim/.yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/Users/jerrykim/.yarn/lib/cli.js:310:30)
+      at /Users/jerrykim/.yarn/lib/cli.js:321:13
 
 npm manifest: 
-  No manifest
+  {
+    "name": "price-chain",
+    "version": "1.0.0",
+    "description": "Blockchain system for COMP726",
+    "main": "server.ts",
+    "author": "Jerryrox",
+    "license": "MIT",
+    "private": true,
+    "dependencies": {
+      "@types/axios": "^0.14.0",
+      "@types/express": "^4.17.6",
+      "axios": "^0.19.2",
+      "body-parser": "^1.19.0",
+      "dotenv": "^8.2.0",
+      "express": "^4.17.1",
+      "supertest": "^4.0.2"
+    },
+    "scripts": {
+      "test-all": "npm run test && npm run lint && npm run tsc",
+      "test": "NODE_ENV=test ./node_modules/.bin/jest ./src",
+      "lint": "eslint src --ext .js,.ts --ignore-path .eslintignore",
+      "build": "rm -rf ./build && babel -d ./build ./src --extensions '.js,.ts' --ignore **/__test__",
+      "start": "MODE_ENV=production node ./build/index.js",
+      "server": "nodemon --exec babel-node src/index.ts --extensions \".ts\",\".js\"",
+      "tsc": "tsc && rm -rf ./ts-out"
+    },
+  
+  }
 
 yarn manifest: 
   No manifest

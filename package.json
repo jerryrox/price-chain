@@ -5,5 +5,44 @@
   "main": "server.ts",
   "author": "Jerryrox",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/express": "^4.17.6",
+    "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "supertest": "^4.0.2",
+    "typescript": "^3.9.7"
+  },
+  "scripts": {
+    "test-all": "npm run test && npm run lint && npm run tsc",
+    "test": "NODE_ENV=test ./node_modules/.bin/jest ./src",
+    "lint": "eslint src --ext .js,.ts --ignore-path .eslintignore",
+    "build": "rm -rf ./build && babel -d ./build ./src --extensions '.js,.ts' --ignore **/__test__",
+    "start": "MODE_ENV=production node ./build/index.js",
+    "server": "nodemon --exec babel-node src/index.ts --extensions \".ts\",\".js\"",
+    "tsc": "tsc && rm -rf ./ts-out"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/node": "^7.10.1",
+    "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "@babel/plugin-transform-runtime": "^7.10.1",
+    "@babel/plugin-transform-typescript": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-typescript": "^7.10.1",
+    "@types/jest": "^25.2.3",
+    "@types/node": "^14.0.13",
+    "@types/supertest": "^2.0.9",
+    "@typescript-eslint/eslint-plugin": "^3.4.0",
+    "@typescript-eslint/parser": "^3.4.0",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.21.1",
+    "jest": "^26.0.1",
+    "nodemon": "^2.0.4"
+  }
 }

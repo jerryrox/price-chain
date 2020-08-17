@@ -1,0 +1,9 @@
+{
+  "name": "price-chain",
+  "version": "1.0.0",
+  "description": "Blockchain system for COMP726",
+  "main": "server.ts",
+  "author": "Jerryrox",
+  "license": "MIT",
+  "private": true
+}

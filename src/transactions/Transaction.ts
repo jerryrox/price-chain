@@ -46,7 +46,7 @@ export default abstract class Transaction {
      * Calculates and returns the hash of the transaction.
      */
     getHash(): string {
-        const dataString = `${this.ruleset},${this.stateId},${this.fromAddress},${this.data.join(",")}`;
+        const dataString = `${this.ruleset},${this.fromAddress},${this.data.join(",")}`;
         return Crypto.getHash(dataString);
     }
 }

@@ -12,13 +12,13 @@ export interface ITransactionParam {
 
 export default abstract class Transaction implements IHashable, IHasStructure {
 
-    readonly ruleset: string;
+    readonly rulesetId: string;
     readonly fromAddress: string;
     readonly data: any[];
 
 
     constructor(param: ITransactionParam) {
-        this.ruleset = param.rulsetId;
+        this.rulesetId = param.rulsetId;
         this.fromAddress = param.fromAddress;
         this.data = param.data;
 
@@ -28,7 +28,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
     }
 
     isValidStructure(): boolean {
-        if (this.ruleset.length === 0) {
+        if (this.rulesetId.length === 0) {
             return false;
         }
         if (this.fromAddress.length === 0) {
@@ -41,7 +41,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.ruleset},${this.fromAddress},${this.data.join(",")}`;
+        const dataString = `${this.rulesetId},${this.fromAddress},${this.data.join(",")}`;
         return CryptoUtils.getHash(dataString);
     }
 }

@@ -1,42 +1,39 @@
 import IHashable from '../utils/IHashable';
 import IHasStructure from '../utils/IHasStructure';
 import CryptoUtils from "../utils/CryptoUtils";
-import Utils from "../utils/Utils";
+import RulesetState from './RulesetState';
 
 export interface IStateParam {
     userAddress: string;
-    rulesetId: string;
-    data: any[];
+    rulesetStates: RulesetState[];
 }
 
-export default abstract class State implements IHashable, IHasStructure {
+export default class State implements IHashable, IHasStructure {
 
     readonly userAddress: string;
-    readonly rulesetId: string;
-    readonly data: any[];
+    readonly rulesetStates: RulesetState[];
 
 
     constructor(param: IStateParam) {
         this.userAddress = param.userAddress;
-        this.rulesetId = param.rulesetId;
-        this.data = param.data;
+        this.rulesetStates = param.rulesetStates;
     }
 
     isValidStructure(): boolean {
         if (this.userAddress.length === 0) {
             return false;
         }
-        if (this.rulesetId.length === 0) {
-            return false;
-        }
-        if (Utils.isNullOrUndefined(this.data)) {
-            return false;
+        for (let i = 0; i < this.rulesetStates.length; i++) {
+            const state = this.rulesetStates[i];
+            if (!state.isValidStructure()) {
+                return false;
+            }
         }
         return true;
     }
 
     getHash(): string {
-        const dataString = `${this.userAddress},${this.rulesetId},${this.data.join(",")}`;
+        const dataString = `${this.userAddress},${this.rulesetStates.map((s) => s.getHash()).join(",")}`;
         return CryptoUtils.getHash(dataString);
     }
 }

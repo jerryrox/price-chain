@@ -1,19 +1,32 @@
-import State from './State';
 import PriceModel from '../models/PriceModel';
-import Utils from "../utils/Utils";
+import RulesetState from './RulesetState';
 
-export default class PriceState extends State {
+interface IPriceStateParam {
+    prices: Record<string, PriceModel>;
+    rulesetId: string;
+}
+
+export default class PriceState extends RulesetState {
+
+    readonly prices: Record<string, PriceModel>;
+
+    constructor(param: IPriceStateParam) {
+        super(param.rulesetId);
+        this.prices = param.prices;
+    }
 
     isValidStructure(): boolean {
-        for (let i = 0; i < this.data.length; i++) {
-            const price = this.data[i] as PriceModel;
-            if (Utils.isNullOrUndefined(price)) {
-                return false;
-            }
+        const values = Object.values(this.prices);
+        for (let i = 0; i < values.length; i++) {
+            const price = values[i];
             if (!price.isValidStructure()) {
                 return false;
             }
         }
         return super.isValidStructure();
+    }
+
+    protected getDataString(): string {
+        return Object.values(this.prices).map((p) => p.getHash()).join(",");
     }
 }

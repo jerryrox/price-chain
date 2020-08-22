@@ -1,21 +1,27 @@
-import State from './State';
+import RulesetState from './RulesetState';
 
-export default class TokenState extends State {
+interface ITokenStateParam {
+    rulesetId: string;
+    balance: number;
+}
 
-    get balance(): number {
-        return this.data[0];
-    }
-    set balance(value: number) {
-        this.data[0] = value;
+export default class TokenState extends RulesetState {
+
+    readonly balance: number;
+
+    constructor(param: ITokenStateParam) {
+        super(param.rulesetId);
+        this.balance = param.balance;
     }
 
     isValidStructure(): boolean {
-        if (this.data.length !== 1) {
-            return false;
-        }
         if (this.balance < 0) {
             return false;
         }
         return super.isValidStructure();
+    }
+
+    protected getDataString(): string {
+        return `${this.balance}`;
     }
 }

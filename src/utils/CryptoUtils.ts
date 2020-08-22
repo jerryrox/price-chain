@@ -1,11 +1,12 @@
+import CryptoJS from "crypto-js";
+
 class CryptoUtils {
 
     /**
      * Returns the hash of the specified value in hex string.
      */
     getHash(value: string): string {
-        // TODO: Hashing
-        return value;
+        return CryptoJS.SHA256(value).toString();
     }
 
     /**

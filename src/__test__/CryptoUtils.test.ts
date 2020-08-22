@@ -3,12 +3,6 @@ import { text } from "body-parser";
 
 describe("CryptoUtils", () => {
     test("getHash", () => {
-        expect(CryptoUtils.getHash("hello")).toBe("hello");
-    });
-    test("getMerkleRoot", () => {
-        expect(CryptoUtils.getMerkleRoot(["a", "b", "c", "d", "e", "f"])).toBe("abcdef");
-        expect(CryptoUtils.getMerkleRoot(["a", "b", "c", "d", "e", "f", "g"])).toBe("abcdefg");
-        expect(CryptoUtils.getMerkleRoot(["a"])).toBe("a");
-        expect(CryptoUtils.getMerkleRoot(["a", "b"])).toBe("ab");
+        expect(CryptoUtils.getHash("hello")).toBe("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824");
     });
 });

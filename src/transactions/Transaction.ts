@@ -1,14 +1,16 @@
-import Crypto from "../utils/Crypto";
+import CryptoUtils from "../utils/CryptoUtils";
 import Utils from "../utils/Utils";
+import IHashable from '../utils/IHashable';
+import IHasStructure from '../utils/IHasStructure';
 
 export interface ITransactionParam {
-    ruleset: string;
+    rulsetId: string;
     stateId: string;
     fromAddress: string;
     data: any[];
 }
 
-export default abstract class Transaction {
+export default abstract class Transaction implements IHashable, IHasStructure {
 
     readonly ruleset: string;
     readonly fromAddress: string;
@@ -16,7 +18,7 @@ export default abstract class Transaction {
 
 
     constructor(param: ITransactionParam) {
-        this.ruleset = param.ruleset;
+        this.ruleset = param.rulsetId;
         this.fromAddress = param.fromAddress;
         this.data = param.data;
 
@@ -25,10 +27,6 @@ export default abstract class Transaction {
         }
     }
 
-    /**
-     * Returns whether this transaction has a valid structure.
-     * May throw an error during validation.
-     */
     isValidStructure(): boolean {
         if (this.ruleset.length === 0) {
             return false;
@@ -42,12 +40,9 @@ export default abstract class Transaction {
         return true;
     }
 
-    /**
-     * Calculates and returns the hash of the transaction.
-     */
     getHash(): string {
         const dataString = `${this.ruleset},${this.fromAddress},${this.data.join(",")}`;
-        return Crypto.getHash(dataString);
+        return CryptoUtils.getHash(dataString);
     }
 }
 

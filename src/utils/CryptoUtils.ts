@@ -1,4 +1,4 @@
-class Crypto {
+class CryptoUtils {
 
     /**
      * Returns the hash of the specified value in hex string.
@@ -31,4 +31,4 @@ class Crypto {
         return this.getMerkleRoot(branchedValues);
     }
 }
-export default new Crypto();
+export default new CryptoUtils();

@@ -2,24 +2,18 @@ import Transaction from './Transaction';
 
 export default class PriceTransaction extends Transaction {
 
-    get businessNumber(): string {
+    get sku(): string {
         return this.data[0];
     }
-    get sku(): string {
+    get price(): number {
         return this.data[1];
     }
-    get price(): number {
-        return this.data[2];
-    }
     get discountRate(): number {
-        return this.data[3];
+        return this.data[2];
     }
 
     isValidStructure(): boolean {
-        if (this.data.length !== 4) {
-            return false;
-        }
-        if (this.businessNumber.length !== 13) {
+        if (this.data.length !== 3) {
             return false;
         }
         if (this.sku.length === 0) {

@@ -2,6 +2,7 @@ import Block from '../blockchain/Block';
 describe("Block", () => {
     test("Instantiation", () => {
         const block = new Block({
+            minerAddress: "",
             difficulty: 1,
             index: 0,
             nonce: 123,
@@ -26,6 +27,7 @@ describe("Block", () => {
             1500,
             123,
             1,
+            "",
             {},
             {}
         ));
@@ -36,12 +38,14 @@ describe("Block", () => {
             123,
             1,
             "",
+            "",
             ""
         ));
     });
 
     test("isValidStructure", () => {
         const block = new Block({
+            minerAddress: "",
             difficulty: 1,
             index: 0,
             nonce: 123,
@@ -58,6 +62,7 @@ describe("Block", () => {
             1500,
             123,
             1,
+            "",
             {},
             {}
         )).toBe(hash);
@@ -67,6 +72,7 @@ describe("Block", () => {
             1500,
             123,
             1,
+            "",
             {},
             {}
         )).not.toBe(hash);
@@ -76,6 +82,7 @@ describe("Block", () => {
             1500,
             123,
             1,
+            "",
             {},
             {}
         )).not.toBe(hash);
@@ -85,6 +92,7 @@ describe("Block", () => {
             1501,
             123,
             1,
+            "",
             {},
             {}
         )).not.toBe(hash);
@@ -94,6 +102,7 @@ describe("Block", () => {
             1500,
             124,
             1,
+            "",
             {},
             {}
         )).not.toBe(hash);
@@ -103,6 +112,7 @@ describe("Block", () => {
             1500,
             123,
             2,
+            "",
             {},
             {}
         )).not.toBe(hash);
@@ -112,6 +122,7 @@ describe("Block", () => {
             1500,
             123,
             1,
+            "",
             "a",
             {}
         )).not.toBe(hash);
@@ -121,6 +132,7 @@ describe("Block", () => {
             1500,
             123,
             1,
+            "",
             {},
             "b"
         )).not.toBe(hash);

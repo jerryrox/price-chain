@@ -1,8 +1,6 @@
-import IHashable from "../utils/IHashable";
 import IHasStructure from "../utils/IHasStructure";
-import CryptoUtils from "../utils/CryptoUtils";
 
-export default abstract class RulesetState implements IHashable, IHasStructure {
+export default abstract class RulesetState implements IHasStructure {
     
     readonly rulesetId: string;
 
@@ -16,14 +14,4 @@ export default abstract class RulesetState implements IHashable, IHasStructure {
         }
         return true;
     }
-
-    getHash(): string {
-        const dataString = `${this.rulesetId}${this.getDataString()}`;
-        return CryptoUtils.getHash(dataString);
-    }
-
-    /**
-     * Returns a string containing the derived type's data to be hashed.
-     */
-    protected abstract getDataString(): string;
 }

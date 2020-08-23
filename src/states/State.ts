@@ -32,7 +32,7 @@ export default class State implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.userAddress}${this.rulesetStates.map((s) => s.getHash()).join("")}`;
+        const dataString = `${this.userAddress}${JSON.stringify(this.rulesetStates)}`;
         return CryptoUtils.getHash(dataString);
     }
 }

@@ -10,8 +10,7 @@ export default class TokenTransaction extends Transaction {
     }
 
     get isReward(): boolean {
-        // TODO: Determine whether this is a reward for mining.
-        return false;
+        return this.fromAddress === "";
     }
 
     isValidStructure(): boolean {

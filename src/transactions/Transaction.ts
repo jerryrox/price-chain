@@ -4,8 +4,7 @@ import IHashable from "../utils/IHashable";
 import IHasStructure from "../utils/IHasStructure";
 
 export interface ITransactionParam {
-    rulsetId: string;
-    stateId: string;
+    rulesetId: string;
     fromAddress: string;
     data: any[];
 }
@@ -16,7 +15,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
     readonly data: any[];
 
     constructor(param: ITransactionParam) {
-        this.rulesetId = param.rulsetId;
+        this.rulesetId = param.rulesetId;
         this.fromAddress = param.fromAddress;
         this.data = param.data;
 
@@ -31,7 +30,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
         if (this.rulesetId.length === 0) {
             return false;
         }
-        if (this.fromAddress.length === 0) {
+        if (Utils.isNullOrUndefined(this.fromAddress)) {
             return false;
         }
         if (Utils.isNullOrUndefined(this.data)) {
@@ -41,7 +40,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.rulesetId}${this.fromAddress}${this.data.join("")}`;
+        const dataString = `${this.rulesetId}${this.fromAddress}${JSON.stringify(this.data)}`;
         return CryptoUtils.getHash(dataString);
     }
 }

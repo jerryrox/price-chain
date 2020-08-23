@@ -20,8 +20,4 @@ export default class TokenState extends RulesetState {
         }
         return super.isValidStructure();
     }
-
-    protected getDataString(): string {
-        return `${this.balance}`;
-    }
 }

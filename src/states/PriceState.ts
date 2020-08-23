@@ -25,8 +25,4 @@ export default class PriceState extends RulesetState {
         }
         return super.isValidStructure();
     }
-
-    protected getDataString(): string {
-        return Object.values(this.prices).map((p) => p.getHash()).join("");
-    }
 }

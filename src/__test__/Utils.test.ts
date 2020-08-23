@@ -9,7 +9,7 @@ describe("Utils", () => {
     });
 
     test("getTimestamp", () => {
-        const date = new Date(2020, 7, 10, 17, 10, 0, 0);
-        expect(Utils.getTimestamp(date)).toBe(1597036200000);
+        const date = new Date(2014, 8, 18, 0, 10, 0, 0);
+        expect(Utils.getTimestamp(date)).toBe(1410955800000);
     });
 });

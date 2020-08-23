@@ -9,11 +9,13 @@
   "dependencies": {
     "@types/axios": "^0.14.0",
     "@types/crypto-js": "^3.1.47",
+    "@types/elliptic": "^6.4.12",
     "@types/express": "^4.17.6",
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "crypto-js": "^4.0.0",
     "dotenv": "^8.2.0",
+    "elliptic": "^6.5.3",
     "express": "^4.17.1",
     "supertest": "^4.0.2",
     "typescript": "^3.9.7"
@@ -26,6 +28,9 @@
     "start": "MODE_ENV=production node ./build/index.js",
     "server": "nodemon --exec babel-node src/index.ts --extensions \".ts\",\".js\"",
     "tsc": "tsc && rm -rf ./ts-out"
+  },
+  "jest" : {
+    "testEnvironment": "node"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.1",

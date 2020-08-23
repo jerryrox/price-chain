@@ -1,10 +1,10 @@
-import IHashable from '../utils/IHashable';
-import IHasStructure from '../utils/IHasStructure';
+import IHashable from "../utils/IHashable";
+import IHasStructure from "../utils/IHasStructure";
 import CryptoUtils from "../utils/CryptoUtils";
 
 export default abstract class RulesetState implements IHashable, IHasStructure {
-
-    readonly rulesetId: string
+    
+    readonly rulesetId: string;
 
     constructor(rulesetId: string) {
         this.rulesetId = rulesetId;
@@ -18,7 +18,7 @@ export default abstract class RulesetState implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.rulesetId},${this.getDataString()}`;
+        const dataString = `${this.rulesetId}${this.getDataString()}`;
         return CryptoUtils.getHash(dataString);
     }
 

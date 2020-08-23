@@ -1,7 +1,7 @@
-import Transaction from './Transaction';
+import Transaction from "./Transaction";
 
 export default class TokenTransaction extends Transaction {
-
+    
     get toAddress(): string {
         return this.data[0];
     }

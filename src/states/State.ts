@@ -1,7 +1,7 @@
-import IHashable from '../utils/IHashable';
-import IHasStructure from '../utils/IHasStructure';
+import IHashable from "../utils/IHashable";
+import IHasStructure from "../utils/IHasStructure";
 import CryptoUtils from "../utils/CryptoUtils";
-import RulesetState from './RulesetState';
+import RulesetState from "./RulesetState";
 
 export interface IStateParam {
     userAddress: string;
@@ -12,7 +12,6 @@ export default class State implements IHashable, IHasStructure {
 
     readonly userAddress: string;
     readonly rulesetStates: RulesetState[];
-
 
     constructor(param: IStateParam) {
         this.userAddress = param.userAddress;
@@ -33,7 +32,7 @@ export default class State implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.userAddress},${this.rulesetStates.map((s) => s.getHash()).join(",")}`;
+        const dataString = `${this.userAddress}${this.rulesetStates.map((s) => s.getHash()).join("")}`;
         return CryptoUtils.getHash(dataString);
     }
 }

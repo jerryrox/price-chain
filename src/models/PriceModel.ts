@@ -42,7 +42,7 @@ export default class PriceModel implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.basePrice},${this.discountRate},${this.sku}`;
+        const dataString = `${this.basePrice}${this.discountRate}${this.sku}`;
         return CryptoUtils.getHash(dataString);
     }
 

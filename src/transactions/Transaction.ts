@@ -1,7 +1,7 @@
 import CryptoUtils from "../utils/CryptoUtils";
 import Utils from "../utils/Utils";
-import IHashable from '../utils/IHashable';
-import IHasStructure from '../utils/IHasStructure';
+import IHashable from "../utils/IHashable";
+import IHasStructure from "../utils/IHasStructure";
 
 export interface ITransactionParam {
     rulsetId: string;
@@ -11,11 +11,9 @@ export interface ITransactionParam {
 }
 
 export default abstract class Transaction implements IHashable, IHasStructure {
-
     readonly rulesetId: string;
     readonly fromAddress: string;
     readonly data: any[];
-
 
     constructor(param: ITransactionParam) {
         this.rulesetId = param.rulsetId;
@@ -23,7 +21,9 @@ export default abstract class Transaction implements IHashable, IHasStructure {
         this.data = param.data;
 
         if (!this.isValidStructure()) {
-            throw new Error(`The transaction was created with invalid parameters!`);
+            throw new Error(
+                `The transaction was created with invalid parameters!`
+            );
         }
     }
 
@@ -41,8 +41,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
     }
 
     getHash(): string {
-        const dataString = `${this.rulesetId},${this.fromAddress},${this.data.join(",")}`;
+        const dataString = `${this.rulesetId}${this.fromAddress}${this.data.join("")}`;
         return CryptoUtils.getHash(dataString);
     }
 }
-

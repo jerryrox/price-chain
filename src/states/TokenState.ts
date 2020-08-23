@@ -1,4 +1,4 @@
-import RulesetState from './RulesetState';
+import RulesetState from "./RulesetState";
 
 interface ITokenStateParam {
     rulesetId: string;
@@ -6,7 +6,7 @@ interface ITokenStateParam {
 }
 
 export default class TokenState extends RulesetState {
-
+    
     readonly balance: number;
 
     constructor(param: ITokenStateParam) {

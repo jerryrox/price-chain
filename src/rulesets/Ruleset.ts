@@ -1,5 +1,5 @@
-import Transaction from '../transactions/Transaction';
-import RulesetState from '../states/RulesetState';
+import Transaction from "../transactions/Transaction";
+import RulesetState from "../states/RulesetState";
 
 interface IRulesetParam {
     rulesetId: string;
@@ -8,7 +8,6 @@ interface IRulesetParam {
 export default abstract class Ruleset {
 
     readonly rulesetId: string;
-
 
     constructor(param: IRulesetParam) {
         this.rulesetId = param.rulesetId;

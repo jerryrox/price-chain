@@ -1,5 +1,5 @@
-import PriceModel from '../models/PriceModel';
-import RulesetState from './RulesetState';
+import PriceModel from "../models/PriceModel";
+import RulesetState from "./RulesetState";
 
 interface IPriceStateParam {
     prices: Record<string, PriceModel>;
@@ -27,6 +27,6 @@ export default class PriceState extends RulesetState {
     }
 
     protected getDataString(): string {
-        return Object.values(this.prices).map((p) => p.getHash()).join(",");
+        return Object.values(this.prices).map((p) => p.getHash()).join("");
     }
 }

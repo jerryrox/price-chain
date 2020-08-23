@@ -13,6 +13,9 @@ class CryptoUtils {
      * Returns the merkle root of the specified array of strings.
      */
     getMerkleRoot(values: string[]): string {
+        if (values.length === 0) {
+            return "";
+        }
         if (values.length === 1) {
             return values[0];
         }

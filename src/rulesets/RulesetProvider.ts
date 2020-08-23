@@ -22,7 +22,7 @@ class RulesetProvider {
      * Returns the ruleset instance of specified id.
      */
     getRuleset(rulesetId: string): Ruleset | null {
-        return this.rulesets[rulesetId] || null;
+        return this.rulesets[rulesetId] ?? null;
     }
 
     /**

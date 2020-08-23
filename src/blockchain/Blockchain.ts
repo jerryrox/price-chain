@@ -101,7 +101,11 @@ export default class Blockchain implements IHasStructure {
             }
             // A reward transaction must exist in the next block for the miner
             // who mined the previous block.
-            if (block.getRewardTransaction(prevBlock.minerAddress) === null) {
+            const rewardTx = block.getRewardTransaction(prevBlock.minerAddress);
+            if (rewardTx === null) {
+                return false;
+            }
+            if (rewardTx.amount !== prevBlock.rewardAmount) {
                 return false;
             }
         }

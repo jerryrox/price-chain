@@ -13,8 +13,13 @@ interface IBlockParam {
     difficulty: number;
     minerAddress: string;
 
-    states: Record<string, State>;
-    transactions: Record<string, Transaction>;
+    states?: Record<string, State>;
+    transactions?: Record<string, Transaction>;
+}
+
+export interface IBlockCalculateHashParam extends IBlockParam {
+    stateMerkleRoot?: string | null,
+    txMerkleRoot?: string | null
 }
 
 export default class Block implements IHashable, IHasStructure {
@@ -56,8 +61,8 @@ export default class Block implements IHashable, IHasStructure {
         this.difficulty = param.difficulty;
         this.minerAddress = param.minerAddress;
 
-        this.states = param.states;
-        this.transactions = param.transactions;
+        this.states = param.states ?? {};
+        this.transactions = param.transactions ?? {};
 
         // Caching hash values.
         this.stateMerkleRoot = Block.calculateMerkleRoot(Object.values(this.states));
@@ -68,28 +73,35 @@ export default class Block implements IHashable, IHasStructure {
     /**
      * Calculates the hash of the specified parameters using the Block's hash rules.
      */
-    static calculateHash(
-        index: number,
-        prevHash: string,
-        timestamp: number,
-        nonce: number,
-        difficulty: number,
-        minerAddress: string,
-        state: Record<string, State> | string,
-        transaction: Record<string, Transaction> | string
-    ): string {
-        const stateMerkleRoot = (
-            typeof (state) === "string" ?
-                state :
-                Block.calculateMerkleRoot(Object.values(state))
+    static calculateHash({
+        difficulty,
+        index,
+        minerAddress,
+        nonce,
+        previousHash,
+        timestamp,
+        stateMerkleRoot,
+        states,
+        transactions,
+        txMerkleRoot
+    }: IBlockCalculateHashParam): string {
+        const smr = (
+            stateMerkleRoot ??
+            Block.calculateMerkleRoot(Object.values(states as any))
         );
-        const txMerkleRoot = (
-            typeof (transaction) === "string" ?
-                transaction :
-                Block.calculateMerkleRoot(Object.values(transaction))
+        const tmr = (
+            txMerkleRoot ??
+            Block.calculateMerkleRoot(Object.values(transactions as any))
         );
-        const dataString = `${index}${prevHash}${timestamp}${nonce}${difficulty}${minerAddress}${stateMerkleRoot}${txMerkleRoot}`;
+        const dataString = `${index}${previousHash}${timestamp}${nonce}${difficulty}${minerAddress}${smr}${tmr}`;
         return CryptoUtils.getHash(dataString);
+    }
+
+    /**
+     * Returns whether the specified hash matches the difficulty.
+     */
+    static hashMatchesDifficulty(hash: string, difficulty: number): boolean {
+        return hash.startsWith("0".repeat(difficulty));
     }
 
     /**
@@ -107,27 +119,48 @@ export default class Block implements IHashable, IHasStructure {
         if (this.txMerkleRoot !== Block.calculateMerkleRoot(Object.values(this.transactions))) {
             return false;
         }
+        // States & Transactions key/value mapping and values shouldn't be tampered.
+        const stateKeys = Object.keys(this.states);
+        for (let i = 0; i < stateKeys.length; i++) {
+            const key = stateKeys[i];
+            if (key !== this.states[key].userAddress) {
+                return false;
+            }
+            if (!this.states[key].isValidStructure()) {
+                return false;
+            }
+        }
+        const txKeys = Object.keys(this.transactions);
+        for (let i = 0; i < txKeys.length; i++) {
+            const key = txKeys[i];
+            if (key !== this.transactions[key].hash) {
+                return false;
+            }
+            if (!this.transactions[key].isValidStructure()) {
+                return false;
+            }
+        }
+
         if (this.hash !== this.getHash()) {
             return false;
         }
-        // TODO: Uncomment when working on mine.
-        // if (!this.hash.startsWith("0".repeat(this.difficulty))) {
-        //     return false;
-        // }
+        if (!Block.hashMatchesDifficulty(this.hash, this.difficulty)) {
+            return false;
+        }
         return true;
     }
 
     getHash(): string {
-        return Block.calculateHash(
-            this.index,
-            this.previousHash,
-            this.timestamp,
-            this.nonce,
-            this.difficulty,
-            this.minerAddress,
-            this.stateMerkleRoot,
-            this.txMerkleRoot
-        );
+        return Block.calculateHash({
+            index: this.index,
+            difficulty: this.difficulty,
+            minerAddress: this.minerAddress,
+            nonce: this.nonce,
+            previousHash: this.previousHash,
+            timestamp: this.timestamp,
+            stateMerkleRoot: this.stateMerkleRoot,
+            txMerkleRoot: this.txMerkleRoot,
+        });
     }
 
     /**

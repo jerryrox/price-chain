@@ -10,6 +10,8 @@ export interface ITransactionParam {
 }
 
 export default abstract class Transaction implements IHashable, IHasStructure {
+    readonly hash: string;
+
     readonly rulesetId: string;
     readonly fromAddress: string;
     readonly data: any[];
@@ -19,14 +21,13 @@ export default abstract class Transaction implements IHashable, IHasStructure {
         this.fromAddress = param.fromAddress;
         this.data = param.data;
 
-        if (!this.isValidStructure()) {
-            throw new Error(
-                `The transaction was created with invalid parameters!`
-            );
-        }
+        this.hash = this.getHash();
     }
 
     isValidStructure(): boolean {
+        if (this.hash !== this.getHash()) {
+            return false;
+        }
         if (this.rulesetId.length === 0) {
             return false;
         }

@@ -10,7 +10,7 @@ class Utils {
    * Returns the timestamp in milliseconds since epoch.
    */
   getTimestamp(date?: Date): number {
-    const newDate = date || new Date();
+    const newDate = date ?? new Date();
     return Date.UTC(
       newDate.getUTCFullYear(),
       newDate.getUTCMonth(),

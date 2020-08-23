@@ -7,3 +7,8 @@ export enum NodeEnvType {
     Production = "production",
     Test= "test"
 }
+
+export interface IKeyPair {
+    privateKey: string,
+    publicKey: string,
+}

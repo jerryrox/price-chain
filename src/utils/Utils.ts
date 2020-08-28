@@ -1,4 +1,10 @@
 class Utils {
+
+  /**
+   * Max number of milliseconds offset the timestamp validation should be forgiving
+   */
+  readonly timestampLeniency = 60 * 1000;
+
   /**
    * Returns whether the specified value is null or undefined.
    */

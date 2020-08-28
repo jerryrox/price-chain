@@ -8,20 +8,9 @@ import TokenTransaction from '../transactions/TokenTransaction';
 
 describe("Blockchain", () => {
     test("Hashes for genesis block", () => {
-        console.log("Genesis Price Transaction", new PriceTransaction({
-            rulesetId: RulesetProvider.priceRuleset.rulesetId,
-            fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            data: [
-                new PriceModel({
-                    sku: "4549767092386",
-                    basePrice: 19.05,
-                    discountRate: 0,
-                }),
-            ]
-        }).getHash());
-
+        console.log("Genesis Price Transaction", Blockchain.genesisTransaction.getHash());
         console.log("Genesis block hash", Blockchain.genesisBlock.getHash());
-        expect(Blockchain.genesisBlock.getHash()).toBe("0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181");
+        expect(Blockchain.genesisBlock.getHash()).toBe("0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3");
     });
     
     test("Instantiation", () => {
@@ -59,8 +48,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 17,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -70,8 +59,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 17,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180113,
             transactions: {},
@@ -80,8 +69,8 @@ describe("Blockchain", () => {
             difficulty: 2,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 17,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -90,8 +79,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5182",
+            nonce: 17,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed2",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -100,8 +89,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 23,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 18,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -110,8 +99,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8d",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 17,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -120,8 +109,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 17,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -133,8 +122,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 22,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 33,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -142,6 +131,7 @@ describe("Blockchain", () => {
         expect(Blockchain.isValidChain(newBlock, Blockchain.genesisBlock)).toBeTruthy();
 
         const fakeRewardTx = new TokenTransaction({
+            timestamp: 0,
             rulesetId: RulesetProvider.tokenRuleset.rulesetId,
             fromAddress: "",
             data: [
@@ -153,8 +143,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 6,
-            previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
+            nonce: 51,
+            previousHash: "019756d703f32d78291995f97cc9b504e9f2eacfe230aa31c66799ebe71b859f",
             states: {},
             timestamp: 1598156580112,
             transactions: {
@@ -165,6 +155,7 @@ describe("Blockchain", () => {
         expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
 
         const fakeRewardTx2 = new TokenTransaction({
+            timestamp: 0,
             rulesetId: RulesetProvider.tokenRuleset.rulesetId,
             fromAddress: "2",
             data: [
@@ -176,8 +167,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 6,
-            previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
+            nonce: 51,
+            previousHash: "019756d703f32d78291995f97cc9b504e9f2eacfe230aa31c66799ebe71b859f",
             states: {},
             timestamp: 1598156580112,
             transactions: {
@@ -188,6 +179,7 @@ describe("Blockchain", () => {
         expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
 
         const rewardTx = new TokenTransaction({
+            timestamp: 0,
             rulesetId: RulesetProvider.tokenRuleset.rulesetId,
             fromAddress: "1",
             data: [
@@ -199,12 +191,12 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 24,
-            previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
+            nonce: 51,
+            previousHash: "019756d703f32d78291995f97cc9b504e9f2eacfe230aa31c66799ebe71b859f",
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                [rewardTx.hash]: rewardTx
+                [`${rewardTx.hash}a`]: rewardTx
             },
         });
         // Slightly changed key in transactions.
@@ -214,8 +206,8 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 30,
-            previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
+            nonce: 51,
+            previousHash: "019756d703f32d78291995f97cc9b504e9f2eacfe230aa31c66799ebe71b859f",
             states: {},
             timestamp: 1598156580112,
             transactions: {

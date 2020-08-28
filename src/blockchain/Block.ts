@@ -45,12 +45,10 @@ export default class Block implements IHashable, IHasStructure {
     readonly transactions: Record<string, Transaction>;
 
     /**
-     * Returns the amount of rewards
+     * Returns the amount of rewards that should be given for mining this block.
      */
     get rewardAmount(): number {
-        const stateCountBonus = Object.keys(this.states).length * 0.4;
-        const txCountBonus = Object.keys(this.transactions).length * 0.6;
-        return Math.floor(20 + stateCountBonus + txCountBonus);
+        return 20;
     }
 
     constructor(param: IBlockParam) {

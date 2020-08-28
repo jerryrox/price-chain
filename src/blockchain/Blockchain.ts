@@ -10,25 +10,28 @@ import IHasStructure from '../utils/IHasStructure';
 
 export default class Blockchain implements IHasStructure {
 
+    static readonly genesisTransaction = new PriceTransaction({
+        timestamp: 1410955800000,
+        rulesetId: RulesetProvider.priceRuleset.rulesetId,
+        fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+        data: [
+            new PriceModel({
+                sku: "4549767092386",
+                basePrice: 19.05,
+                discountRate: 0,
+            }),
+        ]
+    });
+
     static readonly genesisBlock = new Block({
         minerAddress: "",
         difficulty: 1,
         index: 0,
-        nonce: 34,
+        nonce: 50,
         previousHash: "",
         timestamp: 1410955800000,
         transactions: {
-            "5b1a5eadeee770ad4c99fed67a3324a3eb03deecd36ee8c4b380079bcc2ed3e7": new PriceTransaction({
-                rulesetId: RulesetProvider.priceRuleset.rulesetId,
-                fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-                data: [
-                    new PriceModel({
-                        sku: "4549767092386",
-                        basePrice: 19.05,
-                        discountRate: 0,
-                    }),
-                ]
-            }),
+            [Blockchain.genesisTransaction.hash]: Blockchain.genesisTransaction,
         },
         states: {
             "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c": new State({
@@ -90,8 +93,8 @@ export default class Blockchain implements IHasStructure {
             return false;
         }
         // If timestamp out-of-sync by more than 60 seconds, it should be invalid.
-        if ((block.timestamp < prevBlock.timestamp - 60000) ||
-            (Utils.getTimestamp() < block.timestamp - 60000)) {
+        if ((block.timestamp < prevBlock.timestamp - Utils.timestampLeniency) ||
+            (Utils.getTimestamp() < block.timestamp - Utils.timestampLeniency)) {
             return false;
         }
         // A miner address must be present if not the genesis block.

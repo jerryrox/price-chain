@@ -218,5 +218,37 @@ describe("Blockchain", () => {
     });
 
     test("addNewBlock", () => {
+        const blockchain = new Blockchain();
+        const newBlock = new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 33,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed3",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        });
+        expect(blockchain.addNewBlock(newBlock)).toBeTruthy();
+        expect(blockchain.blocks.length).toBe(2);
+        expect(blockchain.blocks[1]).toBe(newBlock);
+    });
+
+    test("Difficulty calculation", () => {
+        const blockchain = new Blockchain();
+
+        const createBlock = (timestamp: number) => {
+            const blockData = {
+                difficulty: blockchain.getCurrentDifficulty(),
+                index: 1,
+                minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                nonce: 0,
+                previousHash: blockchain.lastBlock.hash,
+                states: {},
+                timestamp,
+                transactions: {},
+            }
+            const newBlock = new Block(blockData);
+        };
     });
 });

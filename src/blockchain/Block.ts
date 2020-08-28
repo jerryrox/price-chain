@@ -138,7 +138,6 @@ export default class Block implements IHashable, IHasStructure {
                 return false;
             }
         }
-
         if (this.hash !== this.getHash()) {
             return false;
         }

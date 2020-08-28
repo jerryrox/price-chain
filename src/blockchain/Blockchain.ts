@@ -92,7 +92,7 @@ export default class Blockchain implements IHasStructure {
         if (block.previousHash !== prevBlock.hash) {
             return false;
         }
-        // If timestamp out-of-sync by more than 60 seconds, it should be invalid.
+        // If timestamp out-of-sync by more than the leniency, it should be invalid.
         if ((block.timestamp < prevBlock.timestamp - Utils.timestampLeniency) ||
             (Utils.getTimestamp() < block.timestamp - Utils.timestampLeniency)) {
             return false;
@@ -116,14 +116,17 @@ export default class Blockchain implements IHasStructure {
         // in this list, the list element can be removed, indicating that the reward is valid.
         // If does not exist, however, the reward transaction must be a fake one.
         const pendingRewardBlockIndex = this.getAllBlockIndex(false);
+
         for (let i = 1; i < this.blocks.length; i++) {
             const curBlock = this.blocks[i];
             const prevBlock = this.blocks[i - 1];
             if (!Blockchain.isValidChain(curBlock, prevBlock)) {
                 return false;
             }
-
             if (!this.verifyRewardBlockInx(curBlock, pendingRewardBlockIndex)) {
+                return false;
+            }
+            if (curBlock.difficulty !== this.calculateDifficulty(curBlock.index)) {
                 return false;
             }
         }
@@ -168,6 +171,34 @@ export default class Blockchain implements IHasStructure {
             }
         }
         return blockIndexes;
+    }
+
+    /**
+     * Returns the current difficulty of mining.
+     */
+    getCurrentDifficulty(): number {
+        return this.calculateDifficulty(this.blocks.length);
+    }
+
+    /**
+     * Calculates the appropriate difficulty level at specified block index.
+     */
+    calculateDifficulty(blockIndex: number): number {
+        const intervalIndex = Math.floor(blockIndex / Utils.difficultyInterval);
+        if (intervalIndex === 0) {
+            return Utils.minDifficulty;
+        }
+        const highEndBlock = this.blocks[intervalIndex * Utils.difficultyInterval - 1];
+        const lowEndBlock = this.blocks[(intervalIndex - 1) * Utils.difficultyInterval];
+        const timeDiff = highEndBlock.timestamp - lowEndBlock.timestamp;
+        const expectedTime = Utils.expectedBlocktime * Utils.difficultyInterval;
+        if (timeDiff > expectedTime * 2) {
+            return highEndBlock.difficulty + 1;
+        }
+        if (timeDiff < expectedTime / 2) {
+            return Math.max(1, highEndBlock.difficulty - 1);
+        }
+        return highEndBlock.difficulty;
     }
 
     /**

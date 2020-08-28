@@ -141,6 +141,14 @@ describe("Blockchain", () => {
         });
         expect(Blockchain.isValidChain(newBlock, Blockchain.genesisBlock)).toBeTruthy();
 
+        const fakeRewardTx = new TokenTransaction({
+            rulesetId: RulesetProvider.tokenRuleset.rulesetId,
+            fromAddress: "",
+            data: [
+                "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                newBlock.rewardAmount
+            ]
+        });
         let newBlock2 = new Block({
             difficulty: 1,
             index: 2,
@@ -149,20 +157,44 @@ describe("Blockchain", () => {
             previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
             states: {},
             timestamp: 1598156580112,
-            transactions: {},
+            transactions: {
+                [fakeRewardTx.hash]: fakeRewardTx
+            },
         });
-        // Fails due to missing reward transaction
+        // Fails due to invalid reward transaction
         expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
 
-        const rewardTx = new TokenTransaction({
+        const fakeRewardTx2 = new TokenTransaction({
             rulesetId: RulesetProvider.tokenRuleset.rulesetId,
-            fromAddress: "",
+            fromAddress: "2",
             data: [
                 "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
                 newBlock.rewardAmount
             ]
         });
+        newBlock2 = new Block({
+            difficulty: 1,
+            index: 2,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 6,
+            previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
+            states: {},
+            timestamp: 1598156580112,
+            transactions: {
+                [fakeRewardTx2.hash]: fakeRewardTx2
+            },
+        });
+        // Fails due to invalid reward transaction
+        expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
 
+        const rewardTx = new TokenTransaction({
+            rulesetId: RulesetProvider.tokenRuleset.rulesetId,
+            fromAddress: "1",
+            data: [
+                "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                newBlock.rewardAmount
+            ]
+        });
         newBlock2 = new Block({
             difficulty: 1,
             index: 2,
@@ -172,7 +204,7 @@ describe("Blockchain", () => {
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                "4c421ec8a893f8a63f45f57babd3c75330f93cef4d7b097443c24d3d9ee332b5": rewardTx
+                [rewardTx.hash]: rewardTx
             },
         });
         // Slightly changed key in transactions.
@@ -182,12 +214,12 @@ describe("Blockchain", () => {
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 24,
+            nonce: 30,
             previousHash: "0bfe09bb3ec4d8dc4782f0d7de48f184e849d1a60610ba46330709ce89ce6706",
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                "4c421ec8a893f8a63f45f57babd3c75330f93cef4d7b097443c24d3d9ee332b4": rewardTx
+                [rewardTx.hash]: rewardTx
             },
         });
         expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeTruthy();

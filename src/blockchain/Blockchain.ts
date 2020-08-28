@@ -95,19 +95,9 @@ export default class Blockchain implements IHasStructure {
             return false;
         }
         // A miner address must be present if not the genesis block.
-        if (prevBlock.index !== Blockchain.genesisBlock.index) {
-            if (prevBlock.minerAddress.length === 0) {
-                return false;
-            }
-            // A reward transaction must exist in the next block for the miner
-            // who mined the previous block.
-            const rewardTx = block.getRewardTransaction(prevBlock.minerAddress);
-            if (rewardTx === null) {
-                return false;
-            }
-            if (rewardTx.amount !== prevBlock.rewardAmount) {
-                return false;
-            }
+        if (prevBlock.index !== Blockchain.genesisBlock.index &&
+            prevBlock.minerAddress.length === 0) {
+            return false;
         }
         return true;
     }
@@ -117,14 +107,39 @@ export default class Blockchain implements IHasStructure {
         if (!firstBlock.isValidStructure()) {
             return false;
         }
+
+        // List of block indices for which a reward transaction can be validated against.
+        // For example, if a reward transaction's reward refrence block index is a value that exists
+        // in this list, the list element can be removed, indicating that the reward is valid.
+        // If does not exist, however, the reward transaction must be a fake one.
+        const pendingRewardBlockIndex = this.getAllBlockIndex(false);
         for (let i = 1; i < this.blocks.length; i++) {
             const curBlock = this.blocks[i];
             const prevBlock = this.blocks[i - 1];
             if (!Blockchain.isValidChain(curBlock, prevBlock)) {
                 return false;
             }
+
+            if (!this.verifyRewardBlockInx(curBlock, pendingRewardBlockIndex)) {
+                return false;
+            }
         }
+
         return true;
+    }
+
+    /**
+     * Returns whether the specified block index references a valid index of the block
+     * which a reward can be claimed for.
+     */
+    isValidRewardBlockInx(blockIndex: number): boolean {
+        const pendingRewardBlockIndex = this.getAllBlockIndex(false);
+        for (let i = 1; i < this.blocks.length; i++) {
+            if (!this.verifyRewardBlockInx(this.blocks[i], pendingRewardBlockIndex)) {
+                return false;
+            }
+        }
+        return pendingRewardBlockIndex.includes(blockIndex);
     }
 
     /**
@@ -135,6 +150,37 @@ export default class Blockchain implements IHasStructure {
             return false;
         }
         this.blocks.push(block);
+        return true;
+    }
+
+    /**
+     * Returns the list of all blocks' indices.
+     */
+    getAllBlockIndex(includeGenesis: boolean): number[] {
+        const blockIndexes = this.blocks.map((b) => b.index);
+        if (!includeGenesis) {
+            const genBlockIndexPos = blockIndexes.indexOf(Blockchain.genesisBlock.index);
+            if (genBlockIndexPos >= 0) {
+                blockIndexes.splice(genBlockIndexPos, 1);
+            }
+        }
+        return blockIndexes;
+    }
+
+    /**
+     * Tries verifying that the given block index is a valid block index which a reward
+     * can be claimed for.
+     * Returns whether the verification is successful.
+     */
+    private verifyRewardBlockInx(block: Block, pendingIndexes: number[]): boolean {
+        const rewardTx = block.getRewardTransaction();
+        if (rewardTx !== null) {
+            const listIndex = pendingIndexes.indexOf(rewardTx.rewardRefBlock);
+            if (listIndex < 0 || listIndex >= pendingIndexes.length) {
+                return false;
+            }
+            pendingIndexes.splice(listIndex, 1);
+        }
         return true;
     }
 }

@@ -165,14 +165,13 @@ export default class Block implements IHashable, IHasStructure {
 
     /**
      * Returns the transaction which represents the reward for mining the previous block
-     * using the miner's address.
      * May return null if doesn't exist.
      */
-    getRewardTransaction(toAddress: string): TokenTransaction | null {
+    getRewardTransaction(): TokenTransaction | null {
         const txs = Object.values(this.transactions);
         for (let i = 0; i < txs.length; i++) {
             const tokenTx = txs[i] as TokenTransaction;
-            if (tokenTx !== null && tokenTx.isReward && tokenTx.toAddress === toAddress) {
+            if (tokenTx !== null && tokenTx.isReward) {
                 return tokenTx;
             }
         }

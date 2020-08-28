@@ -23,4 +23,15 @@ describe("Tests for general code", () => {
         expect(newRec["asdf"]).toBe(5);
         expect(newRec["fdsa"]).toBe(6);
     });
+
+    test("Splicing array in a different function", () => {
+        const spliceArray = (arr: number[]) => {
+            arr.splice(1, 2);
+        };
+
+        const array = [0, 1, 2, 3, 4];
+        spliceArray(array);
+        expect(array.length).toBe(3);
+        expect(array).toMatchObject([0, 3, 4]);
+    });
 });

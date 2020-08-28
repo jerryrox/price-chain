@@ -31,6 +31,9 @@ export default abstract class Transaction implements IHashable, IHasStructure {
         if (this.rulesetId.length === 0) {
             return false;
         }
+        if (this.fromAddress.length === 0) {
+            return false;
+        }
         if (Utils.isNullOrUndefined(this.fromAddress)) {
             return false;
         }

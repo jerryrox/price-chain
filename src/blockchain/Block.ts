@@ -63,8 +63,8 @@ export default class Block implements IHashable, IHasStructure {
         this.transactions = param.transactions ?? {};
 
         // Caching hash values.
-        this.stateMerkleRoot = Block.calculateMerkleRoot(Object.values(this.states));
-        this.txMerkleRoot = Block.calculateMerkleRoot(Object.values(this.transactions));
+        this.stateMerkleRoot = CryptoUtils.getMerkleRootForHashable(Object.values(this.states));
+        this.txMerkleRoot = CryptoUtils.getMerkleRootForHashable(Object.values(this.transactions));
         this.hash = this.getHash();
     }
 
@@ -85,11 +85,11 @@ export default class Block implements IHashable, IHasStructure {
     }: IBlockCalculateHashParam): string {
         const smr = (
             stateMerkleRoot ??
-            Block.calculateMerkleRoot(Object.values(states as any))
+            CryptoUtils.getMerkleRootForHashable(Object.values(states as any))
         );
         const tmr = (
             txMerkleRoot ??
-            Block.calculateMerkleRoot(Object.values(transactions as any))
+            CryptoUtils.getMerkleRootForHashable(Object.values(transactions as any))
         );
         const dataString = `${index}${previousHash}${timestamp}${nonce}${difficulty}${minerAddress}${smr}${tmr}`;
         return CryptoUtils.getHash(dataString);
@@ -102,19 +102,14 @@ export default class Block implements IHashable, IHasStructure {
         return hash.startsWith("0".repeat(difficulty));
     }
 
-    /**
-     * Returns the merkle root of the specified hashable values.
-     */
-    private static calculateMerkleRoot(values: IHashable[]): string {
-        return CryptoUtils.getMerkleRoot(values.map((v) => v.getHash()));
-    }
-
     isValidStructure() {
         // Just making sure here that all the cached hash values can be reproduced correctly.
-        if (this.stateMerkleRoot !== Block.calculateMerkleRoot(Object.values(this.states))) {
+        const stateMR = CryptoUtils.getMerkleRootForHashable(Object.values(this.states));
+        if (this.stateMerkleRoot !== stateMR) {
             return false;
         }
-        if (this.txMerkleRoot !== Block.calculateMerkleRoot(Object.values(this.transactions))) {
+        const txMR = CryptoUtils.getMerkleRootForHashable(Object.values(this.transactions));
+        if (this.txMerkleRoot !== txMR) {
             return false;
         }
         // States & Transactions key/value mapping and values shouldn't be tampered.

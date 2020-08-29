@@ -1,7 +1,7 @@
 import RulesetState from "./RulesetState";
+import RulesetIds from "../rulesets/RulesetIds";
 
 interface ITokenStateParam {
-    rulesetId: string;
     balance: number;
 }
 
@@ -10,7 +10,7 @@ export default class TokenState extends RulesetState {
     readonly balance: number;
 
     constructor(param: ITokenStateParam) {
-        super(param.rulesetId);
+        super(RulesetIds.token);
         this.balance = param.balance;
     }
 

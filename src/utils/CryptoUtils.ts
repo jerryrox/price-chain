@@ -1,6 +1,7 @@
 import CryptoJS from "crypto-js";
 import * as EC from "elliptic";
 import { IKeyPair } from './Types';
+import IHashable from './IHashable';
 
 class CryptoUtils {
 
@@ -11,6 +12,13 @@ class CryptoUtils {
      */
     getHash(value: string): string {
         return CryptoJS.SHA256(value).toString();
+    }
+
+    /**
+     * Returns the merkle root for the specified array of IHashable values.
+     */
+    getMerkleRootForHashable(values: IHashable[]): string {
+        return this.getMerkleRoot(values.map((v) => v.getHash()));
     }
 
     /**

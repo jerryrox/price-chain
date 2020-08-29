@@ -113,9 +113,9 @@ export default class Blockchain implements IHasStructure {
         }
 
         // List of block indices for which a reward transaction can be validated against.
-        // For example, if a reward transaction's reward refrence block index is a value that exists
-        // in this list, the list element can be removed, indicating that the reward is valid.
-        // If does not exist, however, the reward transaction must be a fake one.
+        // For example, if a reward transaction's reward reference block index is a value that
+        // exists in this list, the list element can be removed, indicating that the reward
+        // is valid. If does not exist, however, the reward transaction must be a fake one.
         const pendingRewardBlockIndex = this.getAllBlockIndex(false);
 
         for (let i = 1; i < this.blocks.length; i++) {

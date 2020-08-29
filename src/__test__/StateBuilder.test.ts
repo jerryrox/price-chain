@@ -8,6 +8,7 @@ import TokenTransaction from '../transactions/TokenTransaction';
 import TokenState from '../states/TokenState';
 import TestUtils from "./TestUtils";
 import CryptoUtils from "../utils/CryptoUtils";
+import Utils from "../utils/Utils";
 
 describe("StateBuilder", () => {
     test("feedTransaction", () => {
@@ -110,5 +111,51 @@ describe("StateBuilder", () => {
         });
         const mr = CryptoUtils.getMerkleRootForHashable(Object.values(stateBuilder.newState));
         expect(mr).toBe(block.stateMerkleRoot);
+    });
+
+    test("Price change check", () => {
+        const blockchain = new Blockchain();
+        const userAddr = "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c";
+
+        const transactions = [
+            new PriceTransaction({
+                timestamp: Blockchain.genesisBlock.timestamp,
+                fromAddress: userAddr,
+                rulesetId: RulesetIds.price,
+                data: [
+                    new PriceModel({
+                        basePrice: 25.5,
+                        discountRate: 0.5,
+                        sku: "4549767092386"
+                    })
+                ]
+            }),
+        ];
+
+        let stateBuilder = new StateBuilder(blockchain);
+        expect(stateBuilder.feedTransaction(transactions[0])).toBeTruthy();
+
+        const block = TestUtils.mine({
+            difficulty: blockchain.getCurrentDifficulty(),
+            index: blockchain.lastBlock.index + 1,
+            minerAddress: userAddr,
+            nonce: 0,
+            previousHash: blockchain.lastBlock.hash,
+            timestamp: blockchain.lastBlock.timestamp,
+            transactions: {
+                [transactions[0].hash]: transactions[0],
+            },
+            states: stateBuilder.newState
+        });
+        expect(blockchain.addNewBlock(block)).toBeTruthy();
+
+        const priceState = (block.states[userAddr].getRulesetState(RulesetIds.price) as PriceState);
+        expect(Utils.isNullOrUndefined(priceState)).toBeFalsy();
+        expect(Object.values(priceState.prices).length).toBe(1);
+
+        const priconne = priceState.prices["4549767092386"];
+        expect(priconne.basePrice).toBe(25.5);
+        expect(priconne.discountRate).toBe(0.5);
+        expect(priconne.sku).toBe("4549767092386");
     });
 });

@@ -2,6 +2,7 @@ import CryptoUtils from "../utils/CryptoUtils";
 import Utils from "../utils/Utils";
 import IHashable from "../utils/IHashable";
 import IHasStructure from "../utils/IHasStructure";
+import RulesetProvider from "../rulesets/RulesetProvider";
 
 export interface ITransactionParam {
     timestamp: number;
@@ -31,7 +32,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
         if (this.hash !== this.getHash()) {
             return false;
         }
-        if (this.rulesetId.length === 0) {
+        if (!RulesetProvider.hasRuleset(this.rulesetId)) {
             return false;
         }
         if (this.fromAddress.length === 0) {

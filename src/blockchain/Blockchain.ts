@@ -1,18 +1,18 @@
 import Block from './Block';
 import TokenState from '../states/TokenState';
-import RulesetProvider from "../rulesets/RulesetProvider";
 import State from "../states/State";
 import PriceState from '../states/PriceState';
 import PriceModel from '../models/PriceModel';
 import PriceTransaction from '../transactions/PriceTransaction';
 import Utils from "../utils/Utils";
 import IHasStructure from '../utils/IHasStructure';
+import RulesetIds from "../rulesets/RulesetIds";
 
 export default class Blockchain implements IHasStructure {
 
     static readonly genesisTransaction = new PriceTransaction({
         timestamp: 1410955800000,
-        rulesetId: RulesetProvider.priceRuleset.rulesetId,
+        rulesetId: RulesetIds.price,
         fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
         data: [
             new PriceModel({
@@ -27,7 +27,7 @@ export default class Blockchain implements IHasStructure {
         minerAddress: "",
         difficulty: 1,
         index: 0,
-        nonce: 50,
+        nonce: 5,
         previousHash: "",
         timestamp: 1410955800000,
         transactions: {
@@ -36,13 +36,11 @@ export default class Blockchain implements IHasStructure {
         states: {
             "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c": new State({
                 userAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-                rulesetStates: [
-                    new TokenState({
+                rulesetStates: {
+                    [RulesetIds.token]: new TokenState({
                         balance: 10000,
-                        rulesetId: RulesetProvider.tokenRuleset.rulesetId
                     }),
-                    new PriceState({
-                        rulesetId: RulesetProvider.priceRuleset.rulesetId,
+                    [RulesetIds.price]: new PriceState({
                         prices: {
                             "4549767092386": new PriceModel({ // eslint-disable-line
                                 sku: "4549767092386",
@@ -51,7 +49,7 @@ export default class Blockchain implements IHasStructure {
                             }),
                         }
                     }),
-                ]
+                }
             })
         },
     });
@@ -80,7 +78,10 @@ export default class Blockchain implements IHasStructure {
      * Returns whether the chaining of two specified blocks is valid.
      */
     static isValidChain(block: Block, prevBlock: Block): boolean {
-        if (!prevBlock.isValidStructure() || !block.isValidStructure()) {
+        if (!block.isValidStructure()) {
+            return false;
+        }
+        if (!prevBlock.isValidStructure()) {
             return false;
         }
         if (Math.abs(prevBlock.difficulty - block.difficulty) > 1) {
@@ -112,9 +113,9 @@ export default class Blockchain implements IHasStructure {
         }
 
         // List of block indices for which a reward transaction can be validated against.
-        // For example, if a reward transaction's reward refrence block index is a value that exists
-        // in this list, the list element can be removed, indicating that the reward is valid.
-        // If does not exist, however, the reward transaction must be a fake one.
+        // For example, if a reward transaction's reward reference block index is a value that
+        // exists in this list, the list element can be removed, indicating that the reward
+        // is valid. If does not exist, however, the reward transaction must be a fake one.
         const pendingRewardBlockIndex = this.getAllBlockIndex(false);
 
         for (let i = 1; i < this.blocks.length; i++) {
@@ -191,14 +192,30 @@ export default class Blockchain implements IHasStructure {
         const highEndBlock = this.blocks[intervalIndex * Utils.difficultyInterval - 1];
         const lowEndBlock = this.blocks[(intervalIndex - 1) * Utils.difficultyInterval];
         const timeDiff = highEndBlock.timestamp - lowEndBlock.timestamp;
-        const expectedTime = Utils.expectedBlocktime * Utils.difficultyInterval;
+        const expectedTime = Utils.expectedBlocktime * (Utils.difficultyInterval - 1);
         if (timeDiff > expectedTime * 2) {
-            return highEndBlock.difficulty + 1;
-        }
-        if (timeDiff < expectedTime / 2) {
             return Math.max(1, highEndBlock.difficulty - 1);
         }
+        if (timeDiff < expectedTime / 2) {
+            return highEndBlock.difficulty + 1;
+        }
         return highEndBlock.difficulty;
+    }
+
+    /**
+     * Finds the latest state for the specified user address.
+     * May return null if doesn't exist.
+     */
+    findState(userAddress: string, sinceIndex?: number): State | null {
+        const fromIndex = Math.min(sinceIndex ?? (this.blocks.length - 1), this.blocks.length - 1);
+        for (let i = fromIndex; i >= 0; i--) {
+            const block = this.blocks[i];
+            const state = block.states[userAddress];
+            if (!Utils.isNullOrUndefined(state)) {
+                return state;
+            }
+        }
+        return null;
     }
 
     /**

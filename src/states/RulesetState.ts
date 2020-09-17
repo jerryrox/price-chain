@@ -1,4 +1,5 @@
 import IHasStructure from "../utils/IHasStructure";
+import RulesetIds from "../rulesets/RulesetIds";
 
 export default abstract class RulesetState implements IHasStructure {
     
@@ -9,7 +10,7 @@ export default abstract class RulesetState implements IHasStructure {
     }
 
     isValidStructure(): boolean {
-        if (this.rulesetId.length === 0) {
+        if (!RulesetIds.list.includes(this.rulesetId)) {
             return false;
         }
         return true;

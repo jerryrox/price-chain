@@ -1,18 +1,29 @@
 import PriceModel from "../models/PriceModel";
 import RulesetState from "./RulesetState";
+import RulesetIds from "../rulesets/RulesetIds";
+import IHashable from '../utils/IHashable';
+import CryptoUtils from "../utils/CryptoUtils";
 
 interface IPriceStateParam {
-    prices: Record<string, PriceModel>;
-    rulesetId: string;
+    prices?: Record<string, PriceModel>;
 }
 
-export default class PriceState extends RulesetState {
+export default class PriceState extends RulesetState implements IHashable {
 
+    /**
+     * Price information mapped to sku.
+     */
     readonly prices: Record<string, PriceModel>;
 
     constructor(param: IPriceStateParam) {
-        super(param.rulesetId);
-        this.prices = param.prices;
+        super(RulesetIds.price);
+        this.prices = param.prices ?? {};
+    }
+
+    clone(): PriceState {
+        return new PriceState({
+            prices: { ...this.prices }
+        });
     }
 
     isValidStructure(): boolean {
@@ -24,5 +35,10 @@ export default class PriceState extends RulesetState {
             }
         }
         return super.isValidStructure();
+    }
+
+    getHash(): string {
+        const valueString = `${JSON.stringify(this.prices)}`;
+        return CryptoUtils.getHash(valueString);
     }
 }

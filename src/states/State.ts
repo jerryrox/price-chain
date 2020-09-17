@@ -5,25 +5,40 @@ import RulesetState from "./RulesetState";
 
 export interface IStateParam {
     userAddress: string;
-    rulesetStates: RulesetState[];
+    rulesetStates?: Record<string, RulesetState>;
 }
 
 export default class State implements IHashable, IHasStructure {
 
     readonly userAddress: string;
-    readonly rulesetStates: RulesetState[];
+    /**
+     * Ruleset states mapped to their ruleset ids.
+     */
+    readonly rulesetStates: Record<string, RulesetState>;
 
     constructor(param: IStateParam) {
         this.userAddress = param.userAddress;
-        this.rulesetStates = param.rulesetStates;
+        this.rulesetStates = param.rulesetStates ?? {};
+    }
+
+    clone(): State {
+        return new State({
+            rulesetStates: { ...this.rulesetStates },
+            userAddress: this.userAddress
+        });
     }
 
     isValidStructure(): boolean {
         if (this.userAddress.length === 0) {
             return false;
         }
-        for (let i = 0; i < this.rulesetStates.length; i++) {
-            const state = this.rulesetStates[i];
+        const ids = Object.keys(this.rulesetStates);
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            const state = this.rulesetStates[id];
+            if (id !== state.rulesetId) {
+                return false;
+            }
             if (!state.isValidStructure()) {
                 return false;
             }
@@ -34,5 +49,12 @@ export default class State implements IHashable, IHasStructure {
     getHash(): string {
         const dataString = `${this.userAddress}${JSON.stringify(this.rulesetStates)}`;
         return CryptoUtils.getHash(dataString);
+    }
+
+    /**
+     * Returns the ruleset state of specified id, or null if doesn't exist.
+     */
+    getRulesetState(rulesetId: string): RulesetState | null {
+        return this.rulesetStates[rulesetId] ?? null;
     }
 }

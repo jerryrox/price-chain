@@ -1,5 +1,5 @@
-import Transaction from "./Transaction";
 import Utils from "../utils/Utils";
+import Transaction from "./Transaction";
 
 export default class TokenTransaction extends Transaction {
     

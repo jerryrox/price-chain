@@ -2,7 +2,9 @@ import CryptoUtils from "../utils/CryptoUtils";
 import Utils from "../utils/Utils";
 import IHashable from "../utils/IHashable";
 import IHasStructure from "../utils/IHasStructure";
-import RulesetProvider from "../rulesets/RulesetProvider";
+import ISerializable from "../utils/ISerializable";
+import ObjectSerializer from "../utils/ObjectSerializer";
+import RulesetIds from "../rulesets/RulesetIds";
 
 export interface ITransactionParam {
     timestamp: number;
@@ -11,19 +13,19 @@ export interface ITransactionParam {
     data: any[];
 }
 
-export default abstract class Transaction implements IHashable, IHasStructure {
-    readonly hash: string;
+export default abstract class Transaction implements IHashable, ISerializable, IHasStructure {
+    hash: string;
 
-    readonly timestamp: number;
-    readonly rulesetId: string;
-    readonly fromAddress: string;
-    readonly data: any[];
+    timestamp: number;
+    rulesetId: string;
+    fromAddress: string;
+    data: any[];
 
-    constructor(param: ITransactionParam) {
-        this.timestamp = param.timestamp;
-        this.rulesetId = param.rulesetId;
-        this.fromAddress = param.fromAddress;
-        this.data = param.data;
+    constructor(param?: ITransactionParam) {
+        this.timestamp = param?.timestamp ?? 0;
+        this.rulesetId = param?.rulesetId ?? "";
+        this.fromAddress = param?.fromAddress ?? "";
+        this.data = param?.data ?? [];
 
         this.hash = this.getHash();
     }
@@ -32,7 +34,7 @@ export default abstract class Transaction implements IHashable, IHasStructure {
         if (this.hash !== this.getHash()) {
             return false;
         }
-        if (!RulesetProvider.hasRuleset(this.rulesetId)) {
+        if (!RulesetIds.list.includes(this.rulesetId)) {
             return false;
         }
         if (this.fromAddress.length === 0) {
@@ -53,5 +55,13 @@ export default abstract class Transaction implements IHashable, IHasStructure {
     getHash(): string {
         const dataString = `${this.timestamp}${this.rulesetId}${this.fromAddress}${JSON.stringify(this.data)}`;
         return CryptoUtils.getHash(dataString);
+    }
+
+    serialize(): Record<string, any> {
+        return ObjectSerializer.serialize(this);
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this);
     }
 }

@@ -1,12 +1,20 @@
+import Utils from "../utils/Utils";
 import Ruleset from "./Ruleset";
 import Transaction from "../transactions/Transaction";
 import TokenState from "../states/TokenState";
 import TokenTransaction from "../transactions/TokenTransaction";
-import Utils from "../utils/Utils";
 import StateBuilder from '../states/StateBuilder';
 import State from '../states/State';
 
 export default class TokenRuleset extends Ruleset {
+
+    getStateConstructor() {
+        return TokenState;
+    }
+
+    getTxConstructor() {
+        return TokenTransaction;
+    }
 
     buildState(stateBuilder: StateBuilder, transaction: Transaction): State[] | null {
         const tokenTransaction = transaction as TokenTransaction;

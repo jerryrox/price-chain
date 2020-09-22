@@ -9,6 +9,14 @@ import State from '../states/State';
 
 export default class PriceRuleset extends Ruleset {
     
+    getStateConstructor() {
+        return PriceState;
+    }
+
+    getTxConstructor() {
+        return PriceTransaction;
+    }
+
     buildState(stateBuilder: StateBuilder, transaction: Transaction): State[] | null {
         const priceTransaction = transaction as PriceTransaction;
         if (Utils.isNullOrUndefined(priceTransaction)) {

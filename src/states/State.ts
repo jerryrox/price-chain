@@ -2,23 +2,27 @@ import IHashable from "../utils/IHashable";
 import IHasStructure from "../utils/IHasStructure";
 import CryptoUtils from "../utils/CryptoUtils";
 import RulesetState from "./RulesetState";
+import ISerializable from "../utils/ISerializable";
+import ObjectSerializer from "../utils/ObjectSerializer";
+import RulesetProvider from "../rulesets/RulesetProvider";
 
 export interface IStateParam {
     userAddress: string;
     rulesetStates?: Record<string, RulesetState>;
 }
 
-export default class State implements IHashable, IHasStructure {
+export default class State implements IHashable, ISerializable, IHasStructure {
 
-    readonly userAddress: string;
+    userAddress: string;
+
     /**
      * Ruleset states mapped to their ruleset ids.
      */
-    readonly rulesetStates: Record<string, RulesetState>;
+    rulesetStates: Record<string, RulesetState>;
 
-    constructor(param: IStateParam) {
-        this.userAddress = param.userAddress;
-        this.rulesetStates = param.rulesetStates ?? {};
+    constructor(param?: IStateParam) {
+        this.userAddress = param?.userAddress ?? "";
+        this.rulesetStates = param?.rulesetStates ?? {};
     }
 
     clone(): State {
@@ -56,5 +60,17 @@ export default class State implements IHashable, IHasStructure {
      */
     getRulesetState(rulesetId: string): RulesetState | null {
         return this.rulesetStates[rulesetId] ?? null;
+    }
+
+    serialize(): Record<string, any> {
+        return ObjectSerializer.serialize(this);
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this, {
+            rulesetStates: ObjectSerializer.getCheckedMapDeserializer(
+                (value) => RulesetProvider.getStateConstructor(value.rulesetId)
+            )
+        });
     }
 }

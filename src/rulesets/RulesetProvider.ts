@@ -2,6 +2,7 @@ import TokenRuleset from './TokenRuleset';
 import PriceRuleset from './PriceRuleset';
 import Ruleset from './Ruleset';
 import RulesetIds from "./RulesetIds";
+import { IParamConstructor } from "../utils/Types";
 
 class RulesetProvider {
 
@@ -22,10 +23,17 @@ class RulesetProvider {
     }
 
     /**
-     * Returns whether there is a ruleset of specified id.
+     * Returns the RulesetState constructor corresponding to the specified ruleset id.
      */
-    hasRuleset(rulesetId: string): boolean {
-        return this.getRuleset(rulesetId) !== null;
+    getStateConstructor(rulesetId: string): IParamConstructor<any> | null {
+        return this.getRuleset(rulesetId)?.getStateConstructor() ?? null;
+    }
+
+    /**
+     * Returns the Transaction constructor corresponding to the specified ruleset id.
+     */
+    getTxConstructor(rulesetId: string): IParamConstructor<any> | null {
+        return this.getRuleset(rulesetId)?.getTxConstructor() ?? null;
     }
 }
 export default new RulesetProvider();

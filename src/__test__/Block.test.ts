@@ -1,4 +1,5 @@
 import Block from '../blockchain/Block';
+import Blockchain from "../blockchain/Blockchain";
 
 describe("Block", () => {
     test("Instantiation", () => {
@@ -147,5 +148,29 @@ describe("Block", () => {
             timestamp: 1500,
             txMerkleRoot: "b"
         })).not.toBe(hash);
+    });
+
+    test("serialize/deserialize", () => {
+        const block = new Block({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        });
+        let serialized = block.serialize();
+        expect(block).toMatchObject(serialized);
+        let newBlock = new Block();
+        newBlock.deserialize(serialized);
+        expect(newBlock).toMatchObject(block);
+
+        serialized = Blockchain.genesisBlock.serialize();
+        expect(Blockchain.genesisBlock).toMatchObject(serialized);
+        newBlock = new Block();
+        newBlock.deserialize(serialized);
+        expect(Blockchain.genesisBlock).toMatchObject(newBlock.serialize());
     });
 });

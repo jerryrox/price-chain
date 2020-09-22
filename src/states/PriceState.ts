@@ -3,6 +3,7 @@ import RulesetState from "./RulesetState";
 import RulesetIds from "../rulesets/RulesetIds";
 import IHashable from '../utils/IHashable';
 import CryptoUtils from "../utils/CryptoUtils";
+import ObjectSerializer from "../utils/ObjectSerializer";
 
 interface IPriceStateParam {
     prices?: Record<string, PriceModel>;
@@ -13,7 +14,7 @@ export default class PriceState extends RulesetState implements IHashable {
     /**
      * Price information mapped to sku.
      */
-    readonly prices: Record<string, PriceModel>;
+    prices: Record<string, PriceModel>;
 
     constructor(param: IPriceStateParam) {
         super(RulesetIds.price);
@@ -40,5 +41,18 @@ export default class PriceState extends RulesetState implements IHashable {
     getHash(): string {
         const valueString = `${JSON.stringify(this.prices)}`;
         return CryptoUtils.getHash(valueString);
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this, {
+            prices: (value) => {
+                if (typeof (value) === "object") {
+                    const keys = Object.keys(value);
+                    keys.forEach((k) => {
+                        this.prices[k] = new PriceModel(value[k]);
+                    });
+                }
+            }
+        });
     }
 }

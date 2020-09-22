@@ -4,6 +4,9 @@ import IHashable from "../utils/IHashable";
 import CryptoUtils from "../utils/CryptoUtils";
 import IHasStructure from '../utils/IHasStructure';
 import TokenTransaction from '../transactions/TokenTransaction';
+import ISerializable from "../utils/ISerializable";
+import ObjectSerializer from "../utils/ObjectSerializer";
+import RulesetProvider from "../rulesets/RulesetProvider";
 
 interface IBlockParam {
     index: number;
@@ -22,27 +25,27 @@ export interface IBlockCalculateHashParam extends IBlockParam {
     txMerkleRoot?: string | null
 }
 
-export default class Block implements IHashable, IHasStructure {
+export default class Block implements IHashable, ISerializable, IHasStructure {
 
-    readonly hash: string;
-    readonly stateMerkleRoot: string;
-    readonly txMerkleRoot: string;
+    hash: string;
+    stateMerkleRoot: string;
+    txMerkleRoot: string;
 
-    readonly index: number;
-    readonly previousHash: string;
-    readonly timestamp: number;
-    readonly nonce: number;
-    readonly difficulty: number;
-    readonly minerAddress: string;
+    index: number;
+    previousHash: string;
+    timestamp: number;
+    nonce: number;
+    difficulty: number;
+    minerAddress: string;
 
     /**
      * Dictionary of states mapped to userAddress value.
      */
-    readonly states: Record<string, State>;
+    states: Record<string, State>;
     /**
      * Dictionary of transactions mapped to their hashes.
      */
-    readonly transactions: Record<string, Transaction>;
+    transactions: Record<string, Transaction>;
 
     /**
      * Returns the amount of rewards that should be given for mining this block.
@@ -51,16 +54,16 @@ export default class Block implements IHashable, IHasStructure {
         return 20;
     }
 
-    constructor(param: IBlockParam) {
-        this.index = param.index;
-        this.previousHash = param.previousHash;
-        this.timestamp = param.timestamp;
-        this.nonce = param.nonce;
-        this.difficulty = param.difficulty;
-        this.minerAddress = param.minerAddress;
+    constructor(param?: IBlockParam) {
+        this.index = param?.index ?? 0;
+        this.previousHash = param?.previousHash ?? "";
+        this.timestamp = param?.timestamp ?? 0;
+        this.nonce = param?.nonce ?? 0;
+        this.difficulty = param?.difficulty ?? 0;
+        this.minerAddress = param?.minerAddress ?? "";
 
-        this.states = param.states ?? {};
-        this.transactions = param.transactions ?? {};
+        this.states = param?.states ?? {};
+        this.transactions = param?.transactions ?? {};
 
         // Caching hash values.
         this.stateMerkleRoot = CryptoUtils.getMerkleRootForHashable(Object.values(this.states));
@@ -168,5 +171,18 @@ export default class Block implements IHashable, IHasStructure {
             }
         }
         return null;
+    }
+
+    serialize(): Record<string, any> {
+        return ObjectSerializer.serialize(this);
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this, {
+            states: ObjectSerializer.getMapDeserializer(State),
+            transactions: ObjectSerializer.getCheckedMapDeserializer(
+                (value) => RulesetProvider.getTxConstructor(value.rulesetId)
+            ),
+        });
     }
 }

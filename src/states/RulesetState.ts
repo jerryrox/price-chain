@@ -1,9 +1,11 @@
 import IHasStructure from "../utils/IHasStructure";
 import RulesetIds from "../rulesets/RulesetIds";
+import ISerializable from "../utils/ISerializable";
+import ObjectSerializer from "../utils/ObjectSerializer";
 
-export default abstract class RulesetState implements IHasStructure {
+export default abstract class RulesetState implements IHasStructure, ISerializable {
     
-    readonly rulesetId: string;
+    rulesetId: string;
 
     constructor(rulesetId: string) {
         this.rulesetId = rulesetId;
@@ -14,5 +16,13 @@ export default abstract class RulesetState implements IHasStructure {
             return false;
         }
         return true;
+    }
+
+    serialize(): Record<string, any> {
+        return ObjectSerializer.serialize(this);
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this);
     }
 }

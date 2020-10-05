@@ -1,6 +1,8 @@
 import IHashable from '../utils/IHashable';
 import CryptoUtils from "../utils/CryptoUtils";
 import IHasStructure from '../utils/IHasStructure';
+import ISerializable from "../utils/ISerializable";
+import ObjectSerializer from "../utils/ObjectSerializer";
 
 interface IPriceModelParam {
     basePrice: number;
@@ -8,11 +10,11 @@ interface IPriceModelParam {
     sku: string;
 }
 
-export default class PriceModel implements IHashable, IHasStructure {
+export default class PriceModel implements IHashable, ISerializable, IHasStructure {
 
-    readonly basePrice: number;
-    readonly discountRate: number;
-    readonly sku: string;
+    basePrice: number;
+    discountRate: number;
+    sku: string;
 
     /**
      * Returns the final price calculated by basePrice * (1 - discountRate).
@@ -22,10 +24,10 @@ export default class PriceModel implements IHashable, IHasStructure {
     }
 
 
-    constructor(param: IPriceModelParam) {
-        this.basePrice = param.basePrice;
-        this.discountRate = param.discountRate;
-        this.sku = param.sku;
+    constructor(param?: IPriceModelParam) {
+        this.basePrice = param?.basePrice ?? 0;
+        this.discountRate = param?.discountRate ?? 0;
+        this.sku = param?.sku ?? "";
     }
 
     isValidStructure(): boolean {
@@ -44,5 +46,13 @@ export default class PriceModel implements IHashable, IHasStructure {
     getHash(): string {
         const dataString = `${this.basePrice}${this.discountRate}${this.sku}`;
         return CryptoUtils.getHash(dataString);
+    }
+
+    serialize(): Record<string, any> {
+        return ObjectSerializer.serialize(this);
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this);
     }
 }

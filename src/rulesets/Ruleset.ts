@@ -1,5 +1,7 @@
 import Transaction from "../transactions/Transaction";
-import RulesetState from "../states/RulesetState";
+import StateBuilder from '../states/StateBuilder';
+import State from '../states/State';
+import { IParamConstructor } from "../utils/Types";
 
 interface IRulesetParam {
     rulesetId: string;
@@ -14,9 +16,18 @@ export default abstract class Ruleset {
     }
 
     /**
-     * Tries evaluating the transaction with old state to return a new RulesetState.
-     * May return null if evaluation failed safely.
-     * May throw an error if evaluation failed hard.
+     * Returns the RulesetState constructor appropriate for this Ruleset.
      */
-    abstract evaluateState(oldState: RulesetState, transaction: Transaction): RulesetState | null;
+    abstract getStateConstructor(): IParamConstructor<any>;
+
+    /**
+     * Returns the Transaction constructor appropriate for this Ruleset.
+     */
+    abstract getTxConstructor(): IParamConstructor<any>;
+
+    /**
+     * Generates and feeds new states for the specified state builder.
+     * Returns the new states if successful.
+     */
+    abstract buildState(stateBuilder: StateBuilder, transaction: Transaction): State[] | null;
 }

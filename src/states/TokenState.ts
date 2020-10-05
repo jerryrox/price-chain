@@ -1,17 +1,17 @@
 import RulesetState from "./RulesetState";
+import RulesetIds from "../rulesets/RulesetIds";
 
 interface ITokenStateParam {
-    rulesetId: string;
-    balance: number;
+    balance?: number;
 }
 
 export default class TokenState extends RulesetState {
     
-    readonly balance: number;
+    balance: number;
 
-    constructor(param: ITokenStateParam) {
-        super(param.rulesetId);
-        this.balance = param.balance;
+    constructor(param?: ITokenStateParam) {
+        super(RulesetIds.token);
+        this.balance = param?.balance ?? 0;
     }
 
     isValidStructure(): boolean {

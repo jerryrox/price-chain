@@ -1,25 +1,18 @@
 import Blockchain from '../blockchain/Blockchain';
 import Block from '../blockchain/Block';
 import RulesetProvider from "../rulesets/RulesetProvider";
-import PriceTransaction from '../transactions/PriceTransaction';
-import PriceModel from '../models/PriceModel';
+import TestUtils from "./TestUtils";
+import TokenTransaction from '../transactions/TokenTransaction';
+import Utils from "../utils/Utils";
+import RulesetIds from "../rulesets/RulesetIds";
 
 describe("Blockchain", () => {
     test("Hashes for genesis block", () => {
-        console.log("Genesis Price Transaction", new PriceTransaction({
-            rulesetId: RulesetProvider.priceRuleset.rulesetId,
-            fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            data: [
-                new PriceModel({
-                    sku: "4549767092386",
-                    basePrice: 19.05,
-                    discountRate: 0,
-                }),
-            ]
-        }).getHash());
-
+        console.log("Genesis Price Transaction", Blockchain.genesisTransaction.getHash());
         console.log("Genesis block hash", Blockchain.genesisBlock.getHash());
-        expect(Blockchain.genesisBlock.getHash()).toBe("0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181");
+        console.log("Genesis block", Blockchain.genesisBlock);
+        expect(Blockchain.genesisBlock.isValidStructure());
+        expect(Blockchain.genesisBlock.getHash()).toBe("0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca");
     });
     
     test("Instantiation", () => {
@@ -54,17 +47,239 @@ describe("Blockchain", () => {
 
     test("isValidChain", () => {
         expect(Blockchain.isValidChain(new Block({
-            difficulty: 0,
+            difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 0,
-            previousHash: "0854fc1ffe713e1230aa640e3a2fa22378e68b23215f2f46f1df0f5971be5181",
+            nonce: 24,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
         }), Blockchain.genesisBlock)).toBeTruthy();
+
+        expect(Blockchain.isValidChain(new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 24,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180113,
+            transactions: {},
+        }), Blockchain.genesisBlock)).toBeFalsy();
+        expect(Blockchain.isValidChain(new Block({
+            difficulty: 2,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 24,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        }), Blockchain.genesisBlock)).toBeFalsy();
+        expect(Blockchain.isValidChain(new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 24,
+            previousHash: "0ef3e3973b6ac373acba6fffb55921e6737a2df04ec82c064000b64c4098fed2",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        }), Blockchain.genesisBlock)).toBeFalsy();
+        expect(Blockchain.isValidChain(new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 9999,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        }), Blockchain.genesisBlock)).toBeFalsy();
+        expect(Blockchain.isValidChain(new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8d",
+            nonce: 24,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        }), Blockchain.genesisBlock)).toBeFalsy();
+        expect(Blockchain.isValidChain(new Block({
+            difficulty: 1,
+            index: 2,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 24,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        }), Blockchain.genesisBlock)).toBeFalsy();
+    });
+
+    test("isValidChain with two additional blocks", () => {
+        const newBlock = new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 36,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        });
+        expect(Blockchain.isValidChain(newBlock, Blockchain.genesisBlock)).toBeTruthy();
+
+        const fakeRewardTx = new TokenTransaction({
+            timestamp: 0,
+            rulesetId: RulesetIds.token,
+            fromAddress: "",
+            data: [
+                "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                newBlock.rewardAmount
+            ]
+        });
+        let newBlock2 = new Block({
+            difficulty: 1,
+            index: 2,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 19,
+            previousHash: newBlock.hash,
+            states: {},
+            timestamp: 1598156580112,
+            transactions: {
+                [fakeRewardTx.hash]: fakeRewardTx
+            },
+        });
+        // Fails due to invalid reward transaction
+        expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
+
+        const fakeRewardTx2 = new TokenTransaction({
+            timestamp: 0,
+            rulesetId: RulesetIds.token,
+            fromAddress: "2",
+            data: [
+                "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                newBlock.rewardAmount
+            ]
+        });
+        newBlock2 = new Block({
+            difficulty: 1,
+            index: 2,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 19,
+            previousHash: newBlock.hash,
+            states: {},
+            timestamp: 1598156580112,
+            transactions: {
+                [fakeRewardTx2.hash]: fakeRewardTx2
+            },
+        });
+        // Fails due to invalid reward transaction
+        expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
+
+        const rewardTx = new TokenTransaction({
+            timestamp: 0,
+            rulesetId: RulesetIds.token,
+            fromAddress: "1",
+            data: [
+                "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                newBlock.rewardAmount
+            ]
+        });
+        newBlock2 = new Block({
+            difficulty: 1,
+            index: 2,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 19,
+            previousHash: newBlock.hash,
+            states: {},
+            timestamp: 1598156580112,
+            transactions: {
+                [`${rewardTx.hash}a`]: rewardTx
+            },
+        });
+        // Slightly changed key in transactions.
+        expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
+
+        newBlock2 = new Block({
+            difficulty: 1,
+            index: 2,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 19,
+            previousHash: newBlock.hash,
+            states: {},
+            timestamp: 1598156580112,
+            transactions: {
+                [rewardTx.hash]: rewardTx
+            },
+        });
+        expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeTruthy();
     });
 
     test("addNewBlock", () => {
+        const blockchain = new Blockchain();
+        const newBlock = new Block({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 24,
+            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            states: {},
+            timestamp: 1598156180112,
+            transactions: {},
+        });
+        expect(blockchain.addNewBlock(newBlock)).toBeTruthy();
+        expect(blockchain.blocks.length).toBe(2);
+        expect(blockchain.blocks[1]).toBe(newBlock);
+    });
+
+    test("Difficulty calculation", () => {
+        let blockchain = new Blockchain();
+
+        const createBlock = (timestamp: number): Block => {
+            const blockData = {
+                difficulty: blockchain.getCurrentDifficulty(),
+                index: blockchain.lastBlock.index + 1,
+                minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                nonce: 0,
+                previousHash: blockchain.lastBlock.hash,
+                states: {},
+                timestamp,
+                transactions: {},
+            }
+            const block = TestUtils.mine(blockData, false);
+            expect(blockchain.addNewBlock(block)).toBeTruthy();
+            return block;
+        };
+        // Perfectly expected time
+        for (let i = 0; i < Utils.difficultyInterval; i++) {
+            createBlock(blockchain.lastBlock.timestamp + Utils.expectedBlocktime);
+        }
+        expect(blockchain.blocks.length).toBe(1 + Utils.difficultyInterval);
+        expect(blockchain.getCurrentDifficulty()).toBe(Blockchain.genesisBlock.difficulty);
+
+        // Longer than expected time * 2, but difficulty shouldn't decrease.
+        for (let i = 0; i < Utils.difficultyInterval; i++) {
+            createBlock(blockchain.lastBlock.timestamp + (Utils.expectedBlocktime * 2 + 1));
+        }
+        expect(blockchain.blocks.length).toBe(1 + Utils.difficultyInterval * 2);
+        expect(blockchain.getCurrentDifficulty()).toBe(Blockchain.genesisBlock.difficulty);
+
+        // Shorter than expected time / 2. Difficulty should increase.
+        for (let i = 0; i < Utils.difficultyInterval; i++) {
+            createBlock(blockchain.lastBlock.timestamp + (Utils.expectedBlocktime / 2 - 1));
+        }
+        expect(blockchain.blocks.length).toBe(1 + Utils.difficultyInterval * 3);
+        expect(blockchain.getCurrentDifficulty()).toBe(Blockchain.genesisBlock.difficulty + 1);
+
+        // Longer than expected time * 2, difficulty should decrease.
+        for (let i = 0; i < Utils.difficultyInterval; i++) {
+            createBlock(blockchain.lastBlock.timestamp + (Utils.expectedBlocktime * 2 + 1));
+        }
+        expect(blockchain.blocks.length).toBe(1 + Utils.difficultyInterval * 4);
+        expect(blockchain.getCurrentDifficulty()).toBe(Blockchain.genesisBlock.difficulty);
     });
 });

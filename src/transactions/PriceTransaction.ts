@@ -1,6 +1,7 @@
 import Transaction from "./Transaction";
 import PriceModel from "../models/PriceModel";
 import Utils from "../utils/Utils";
+import ObjectSerializer from "../utils/ObjectSerializer";
 
 export default class PriceTransaction extends Transaction {
     
@@ -15,5 +16,15 @@ export default class PriceTransaction extends Transaction {
             }
         }
         return super.isValidStructure();
+    }
+
+    deserialize(data: Record<string, any>) {
+        ObjectSerializer.deserialize(data, this, {
+            data: (value) => {
+                if (Array.isArray(value)) {
+                    this.data = value.map((v) => new PriceModel(v));
+                }
+            }
+        });
     }
 }

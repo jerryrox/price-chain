@@ -1,35 +1,53 @@
 import Ruleset from "./Ruleset";
-import RulesetState from "../states/RulesetState";
 import Transaction from "../transactions/Transaction";
-import PriceState from "../states/PriceState";
+import PriceState from '../states/PriceState';
 import PriceTransaction from "../transactions/PriceTransaction";
 import Utils from "../utils/Utils";
 import PriceModel from "../models/PriceModel";
+import StateBuilder from '../states/StateBuilder';
+import State from '../states/State';
 
 export default class PriceRuleset extends Ruleset {
     
-    evaluateState(oldState: RulesetState, transaction: Transaction): RulesetState | null {
-        const oldPriceState = oldState as PriceState;
+    getStateConstructor() {
+        return PriceState;
+    }
+
+    getTxConstructor() {
+        return PriceTransaction;
+    }
+
+    buildState(stateBuilder: StateBuilder, transaction: Transaction): State[] | null {
         const priceTransaction = transaction as PriceTransaction;
-        if (Utils.isNullOrUndefined(oldPriceState)) {
-            return null;
-        }
         if (Utils.isNullOrUndefined(priceTransaction)) {
             return null;
         }
+        if (priceTransaction.data.length === 0) {
+            return null;
+        }
+        const state = this.createState(stateBuilder, priceTransaction);
+        if (state === null) {
+            return null;
+        }
+        return [state];
+    }
 
-        const newPrices = { ...oldPriceState.prices };
+    private createState(
+        stateBuilder: StateBuilder, priceTransaction: PriceTransaction
+    ): State | null {
+        const state = stateBuilder.findState(priceTransaction.fromAddress);
+
+        // Generate new price state
+        let priceState = state.getRulesetState(this.rulesetId) as PriceState;
+        priceState = priceState?.clone() ?? new PriceState({});
         for (let i = 0; i < priceTransaction.data.length; i++) {
             const price = priceTransaction.data[i] as PriceModel;
             if (Utils.isNullOrUndefined(price)) {
                 return null;
             }
-            newPrices[price.sku] = price;
+            priceState.prices[price.sku] = price;
         }
-
-        return new PriceState({
-            rulesetId: oldPriceState.rulesetId,
-            prices: newPrices,
-        });
+        state.rulesetStates[this.rulesetId] = priceState;
+        return state;
     }
 }

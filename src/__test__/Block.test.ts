@@ -1,4 +1,6 @@
 import Block from '../blockchain/Block';
+import Blockchain from "../blockchain/Blockchain";
+
 describe("Block", () => {
     test("Instantiation", () => {
         const block = new Block({
@@ -21,26 +23,26 @@ describe("Block", () => {
 
         expect(block.stateMerkleRoot).toBe("");
         expect(block.txMerkleRoot).toBe("");
-        expect(block.hash).toBe(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            123,
-            1,
-            "",
-            {},
-            {}
-        ));
-        expect(block.hash).toBe(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            123,
-            1,
-            "",
-            "",
-            ""
-        ));
+        expect(block.hash).toBe(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        }));
+        expect(block.hash).toBe(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            stateMerkleRoot: "",
+            timestamp: 1500,
+            txMerkleRoot: "",
+        }));
     });
 
     test("isValidStructure", () => {
@@ -56,85 +58,119 @@ describe("Block", () => {
         });
         const hash = block.hash;
 
-        expect(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            123,
-            1,
-            "",
-            {},
-            {}
-        )).toBe(hash);
-        expect(Block.calculateHash(
-            1,
-            "asdfzxcv",
-            1500,
-            123,
-            1,
-            "",
-            {},
-            {}
-        )).not.toBe(hash);
-        expect(Block.calculateHash(
-            0,
-            "asdfzxc",
-            1500,
-            123,
-            1,
-            "",
-            {},
-            {}
-        )).not.toBe(hash);
-        expect(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1501,
-            123,
-            1,
-            "",
-            {},
-            {}
-        )).not.toBe(hash);
-        expect(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            124,
-            1,
-            "",
-            {},
-            {}
-        )).not.toBe(hash);
-        expect(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            123,
-            2,
-            "",
-            {},
-            {}
-        )).not.toBe(hash);
-        expect(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            123,
-            1,
-            "",
-            "a",
-            {}
-        )).not.toBe(hash);
-        expect(Block.calculateHash(
-            0,
-            "asdfzxcv",
-            1500,
-            123,
-            1,
-            "",
-            {},
-            "b"
-        )).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        })).toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 1,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "a",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 2,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 124,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcvb",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1501,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            stateMerkleRoot: "a",
+            timestamp: 1500,
+            transactions: {}
+        })).not.toBe(hash);
+        expect(Block.calculateHash({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            txMerkleRoot: "b"
+        })).not.toBe(hash);
+    });
+
+    test("serialize/deserialize", () => {
+        const block = new Block({
+            minerAddress: "",
+            difficulty: 1,
+            index: 0,
+            nonce: 123,
+            previousHash: "asdfzxcv",
+            states: {},
+            timestamp: 1500,
+            transactions: {}
+        });
+        let serialized = block.serialize();
+        expect(block).toMatchObject(serialized);
+        let newBlock = new Block();
+        newBlock.deserialize(serialized);
+        expect(newBlock).toMatchObject(block);
+
+        serialized = Blockchain.genesisBlock.serialize();
+        expect(Blockchain.genesisBlock).toMatchObject(serialized);
+        newBlock = new Block();
+        newBlock.deserialize(serialized);
+        expect(Blockchain.genesisBlock).toMatchObject(newBlock.serialize());
     });
 });

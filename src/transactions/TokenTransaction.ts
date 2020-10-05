@@ -1,3 +1,4 @@
+import Utils from "../utils/Utils";
 import Transaction from "./Transaction";
 
 export default class TokenTransaction extends Transaction {
@@ -9,8 +10,29 @@ export default class TokenTransaction extends Transaction {
         return this.data[1];
     }
 
+    /**
+     * Returns whether this transaction is a reward for mining a block.
+     */
     get isReward(): boolean {
-        return this.fromAddress === "";
+        try {
+            const rewardBlockInx = this.rewardRefBlock;
+            return rewardBlockInx > 0;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    /**
+     * Returns the block number from which the reward transaction is occurring from.
+     */
+    get rewardRefBlock(): number {
+        const blockIndex = parseInt(this.fromAddress, 10);
+        if (Number.isNaN(blockIndex) ||
+            Utils.isNullOrUndefined(blockIndex) ||
+            String(blockIndex).length !== this.fromAddress.length) {
+            throw new Error("This transaction is not for rewarding!");
+        }
+        return blockIndex;
     }
 
     isValidStructure(): boolean {

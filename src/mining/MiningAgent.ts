@@ -13,6 +13,9 @@ export default class MiningAgent {
 
     private isAutoMine = false;
 
+    get hasMiner(): boolean {
+        return this.miner.length > 0;
+    }
     get autoMine(): boolean {
         return this.isAutoMine;
     }
@@ -27,6 +30,10 @@ export default class MiningAgent {
     }
 
     mine(): Block | null {
+        if (!this.hasMiner) {
+            return null;
+        }
+
         // Forcibly break out if there's nothing to mine.
         const transactions = this.pool.pickTransactions(Utils.maxTransactionPerBlock);
         // Ensure validity of the transactions.

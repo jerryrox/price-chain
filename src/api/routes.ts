@@ -5,6 +5,7 @@ import RulesetIds from "../rulesets/RulesetIds";
 import PriceState from "../states/PriceState";
 import TokenState from "../states/TokenState";
 import PriceTransaction from "../transactions/PriceTransaction";
+import TokenTransaction from "../transactions/TokenTransaction";
 import Utils from "../utils/Utils";
 import ApiHelper from "./helpers/ApiHelper";
 import IApiAddPriceParam from "./models/IApiAddPriceParam";
@@ -123,6 +124,28 @@ routes.post("/add-prices", (req, res) => {
     }
 });
 
-// routes.post("/
+routes.post("/send-token", (req, res) => {
+    try {
+        const fromAddress = req.body.fromAddress as string;
+        const toAddress = req.body.toAddress as string;
+        const amount = Utils.tryParseInt(req.body.amount, 0);
+
+        if (amount <= 0) {
+            throw new Error("Amount must be greater than 0.");
+        }
+
+        const tx = new TokenTransaction({
+            fromAddress,
+            timestamp: Date.now(),
+            rulesetId: RulesetIds.token,
+            data: TokenTransaction.newData(toAddress, amount),
+        });
+        App.transactionPool.add(tx);
+        ApiHelper.sendSuccessResponse(res);
+    }
+    catch (e) {
+        ApiHelper.sendErrorResponse(res, e.message);
+    }
+});
 
 export default routes;

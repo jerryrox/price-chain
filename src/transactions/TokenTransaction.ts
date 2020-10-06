@@ -35,6 +35,13 @@ export default class TokenTransaction extends Transaction {
         return blockIndex;
     }
 
+    /**
+     * Creates a new instance of data parameter for the token transaction.
+     */
+    static newData(toAddress: string, amount: number): any[] {
+        return [toAddress, amount];
+    }
+
     isValidStructure(): boolean {
         if (this.data.length !== 2) {
             return false;

@@ -11,16 +11,8 @@ export default class MiningAgent {
     readonly pool: TransactionPool;
     readonly miner: string;
 
-    private isAutoMine = false;
-
     get hasMiner(): boolean {
         return this.miner.length > 0;
-    }
-    get autoMine(): boolean {
-        return this.isAutoMine;
-    }
-    set autoMine(value: boolean) {
-        this.isAutoMine = value;
     }
 
     constructor(blockchain: Blockchain, pool: TransactionPool, miner: string) {

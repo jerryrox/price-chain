@@ -45,7 +45,7 @@ class App {
         const result = this.miningAgent.mine();
         if (result !== null) {
             if (this.blockchain.addNewBlock(result)) {
-                console.log(`Mined block index: ${result.index}`);
+                console.log(`Mined block index: ${result.index}`);// , result);
             }
         }
         setTimeout(() => this.doMining(), this.miningInterval);

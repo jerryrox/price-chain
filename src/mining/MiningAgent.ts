@@ -71,10 +71,15 @@ export default class MiningAgent {
         };
         while (true) { // eslint-disable-line
             const hash = Block.calculateHash(tempBlock);
-            if (Block.hashMatchesDifficulty(hash, difficulty)) {
-                return new Block(tempBlock);
+            if (!Block.hashMatchesDifficulty(hash, difficulty)) {
+                tempBlock.nonce++;
+                continue;
             }
-            tempBlock.nonce++;
+
+            transactions.forEach((tx) => {
+                this.pool.remove(tx);
+            });
+            return new Block(tempBlock);
         }
     }
 }

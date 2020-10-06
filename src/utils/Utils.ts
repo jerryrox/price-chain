@@ -47,5 +47,18 @@ class Utils {
       newDate.getUTCMilliseconds()
     );
   }
+
+  /**
+   * Tries parsing the specified string as an int.
+   */
+  tryParseInt(value: string, defaultValue: number): number {
+    try {
+      const num = parseInt(value, 10);
+      return Number.isNaN(num) ? defaultValue : num;
+    }
+    catch {
+      return defaultValue;
+    }
+  }
 }
 export default new Utils();

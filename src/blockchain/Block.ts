@@ -105,6 +105,35 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
         return hash.startsWith("0".repeat(difficulty));
     }
 
+    /**
+     * Returns the transaction which represents the reward for mining the previous block
+     * May return null if doesn't exist.
+     */
+    getRewardTransaction(): TokenTransaction | null {
+        const txs = Object.values(this.transactions);
+        for (let i = 0; i < txs.length; i++) {
+            const tokenTx = txs[i] as TokenTransaction;
+            if (tokenTx !== null && tokenTx.isReward) {
+                return tokenTx;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns all states in this block.
+     */
+    getAllStates(): State[] {
+        return Object.values(this.states);
+    }
+
+    /**
+     * Finds and return the state of specified user address.
+     */
+    getStateOfUser(userAddress: string): State | null{
+        return this.states[userAddress] ?? null;
+    }
+
     isValidStructure() {
         // Just making sure here that all the cached hash values can be reproduced correctly.
         const stateMR = CryptoUtils.getMerkleRootForHashable(Object.values(this.states));
@@ -156,21 +185,6 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
             stateMerkleRoot: this.stateMerkleRoot,
             txMerkleRoot: this.txMerkleRoot,
         });
-    }
-
-    /**
-     * Returns the transaction which represents the reward for mining the previous block
-     * May return null if doesn't exist.
-     */
-    getRewardTransaction(): TokenTransaction | null {
-        const txs = Object.values(this.transactions);
-        for (let i = 0; i < txs.length; i++) {
-            const tokenTx = txs[i] as TokenTransaction;
-            if (tokenTx !== null && tokenTx.isReward) {
-                return tokenTx;
-            }
-        }
-        return null;
     }
 
     serialize(): Record<string, any> {

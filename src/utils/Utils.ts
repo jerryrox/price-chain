@@ -26,6 +26,11 @@ class Utils {
   readonly timestampLeniency = 60 * 1000;
 
   /**
+   * Amount of rewarded tokens for mining a new block.
+   */
+  readonly miningReward = 20;
+
+  /**
    * Returns whether the specified value is null or undefined.
    */
   isNullOrUndefined(value: any) {

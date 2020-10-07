@@ -138,7 +138,7 @@ describe("Blockchain", () => {
             fromAddress: "",
             data: [
                 "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-                newBlock.rewardAmount
+                Utils.miningReward
             ]
         });
         let newBlock2 = new Block({
@@ -162,7 +162,7 @@ describe("Blockchain", () => {
             fromAddress: "2",
             data: [
                 "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-                newBlock.rewardAmount
+                Utils.miningReward
             ]
         });
         newBlock2 = new Block({
@@ -186,7 +186,7 @@ describe("Blockchain", () => {
             fromAddress: "1",
             data: [
                 "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-                newBlock.rewardAmount
+                Utils.miningReward
             ]
         });
         newBlock2 = new Block({

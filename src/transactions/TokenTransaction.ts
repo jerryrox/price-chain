@@ -1,3 +1,4 @@
+import RulesetIds from "../rulesets/RulesetIds";
 import Utils from "../utils/Utils";
 import Transaction from "./Transaction";
 
@@ -33,6 +34,21 @@ export default class TokenTransaction extends Transaction {
             throw new Error("This transaction is not for rewarding!");
         }
         return blockIndex;
+    }
+
+    /**
+     * Creates a new token transaction instance representing a reward for mining blocks.
+     */
+    static newRewardTx(
+        timestamp: number, blockIndex: number,
+        address: string, reward: number
+    ): TokenTransaction {
+        return new TokenTransaction({
+            timestamp,
+            rulesetId: RulesetIds.token,
+            fromAddress: blockIndex.toString(),
+            data: TokenTransaction.newData(address, reward),
+        });
     }
 
     /**

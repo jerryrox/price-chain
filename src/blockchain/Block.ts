@@ -47,13 +47,6 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
      */
     transactions: Record<string, Transaction>;
 
-    /**
-     * Returns the amount of rewards that should be given for mining this block.
-     */
-    get rewardAmount(): number {
-        return 20;
-    }
-
     constructor(param?: IBlockParam) {
         this.index = param?.index ?? 0;
         this.previousHash = param?.previousHash ?? "";

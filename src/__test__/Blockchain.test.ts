@@ -32,6 +32,7 @@ describe("Blockchain", () => {
         const blockchain = new Blockchain();
         expect(blockchain.isValidStructure()).toBeTruthy();
 
+        // Just an invalid block
         blockchain.blocks.push(new Block({
             difficulty: 1,
             index: 1,
@@ -43,6 +44,79 @@ describe("Blockchain", () => {
             transactions: {}
         }));
         expect(blockchain.isValidStructure()).toBeFalsy();
+        blockchain.blocks.splice(1, 1);
+
+        // Block with no transaction should fail.
+        let block = TestUtils.mine({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 0,
+            previousHash: blockchain.firstBlock.hash,
+            states: {},
+            timestamp: Date.now(),
+            transactions: {}
+        });
+        blockchain.blocks.push(block);
+        expect(blockchain.isValidStructure()).toBeFalsy();
+        blockchain.blocks.splice(1, 1);
+
+        // Block with only reward transaction should fail.
+        const rewardTx = TokenTransaction.newRewardTx(
+            Date.now(), 1, "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c", Utils.miningReward
+        );
+        block = TestUtils.mine({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 0,
+            previousHash: blockchain.firstBlock.hash,
+            states: {},
+            timestamp: Date.now(),
+            transactions: {[rewardTx.hash]: rewardTx}
+        });
+        blockchain.blocks.push(block);
+        expect(blockchain.isValidStructure()).toBeFalsy();
+        blockchain.blocks.splice(1, 1);
+
+        // Block with no reward transaction should fail.
+        const transferTx = new TokenTransaction({
+            data: TokenTransaction.newData("asdf", 10),
+            fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            rulesetId: RulesetIds.token,
+            timestamp: Date.now()
+        });
+        block = TestUtils.mine({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 0,
+            previousHash: blockchain.firstBlock.hash,
+            states: {},
+            timestamp: Date.now(),
+            transactions: {[transferTx.hash]: transferTx}
+        });
+        blockchain.blocks.push(block);
+        expect(blockchain.isValidStructure()).toBeFalsy();
+        blockchain.blocks.splice(1, 1);
+
+        // This should succeed.
+        block = TestUtils.mine({
+            difficulty: 1,
+            index: 1,
+            minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            nonce: 0,
+            previousHash: blockchain.firstBlock.hash,
+            states: {},
+            timestamp: Date.now(),
+            transactions: {
+                [transferTx.hash]: transferTx,
+                [rewardTx.hash]: rewardTx,
+            }
+        });
+        blockchain.blocks.push(block);
+        expect(blockchain.isValidStructure()).toBeTruthy();
+        blockchain.blocks.splice(1, 1);
     });
 
     test("isValidChain", () => {

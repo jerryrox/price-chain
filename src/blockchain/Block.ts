@@ -7,6 +7,7 @@ import TokenTransaction from '../transactions/TokenTransaction';
 import ISerializable from "../utils/ISerializable";
 import ObjectSerializer from "../utils/ObjectSerializer";
 import RulesetProvider from "../rulesets/RulesetProvider";
+import Utils from "../utils/Utils";
 
 interface IBlockParam {
     index: number;
@@ -99,18 +100,18 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
     }
 
     /**
-     * Returns the transaction which represents the reward for mining the previous block
-     * May return null if doesn't exist.
+     * Returns the list of reward transactions in the block.
      */
-    getRewardTransaction(): TokenTransaction | null {
+    getRewardTransactions(): TokenTransaction[] {
         const txs = Object.values(this.transactions);
+        const rewards: TokenTransaction[] = [];
         for (let i = 0; i < txs.length; i++) {
             const tokenTx = txs[i] as TokenTransaction;
             if (tokenTx !== null && tokenTx.isReward) {
-                return tokenTx;
+                rewards.push(tokenTx);
             }
         }
-        return null;
+        return rewards;
     }
 
     /**
@@ -162,6 +163,26 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
             return false;
         }
         if (!Block.hashMatchesDifficulty(this.hash, this.difficulty)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Verifies that the reward transaction has been included correctly.
+     * This should only be called for non-genesis block.
+     * Returns whether the verification is successful.
+     */
+    hasValidReward() {
+        const rewards = this.getRewardTransactions();
+        // There must only be one reward transaction,
+        // and it mustn't be the only transaction in the block.
+        if (rewards.length !== 1 || Object.keys(this.transactions).length <= 1) {
+            return false;
+        }
+        const tx = rewards[0];
+        if (tx.rewardRefBlock !== this.index ||
+            tx.amount !== Utils.miningReward) {
             return false;
         }
         return true;

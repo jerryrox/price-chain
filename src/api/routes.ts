@@ -13,6 +13,9 @@ import IApiPriceInfo from "./models/IApiPriceInfo";
 
 const routes = express.Router();
 
+/**
+ * Returns the raw data of blockchain.
+ */
 routes.get("/get-chain", (req, res) => {
     ApiHelper.sendSuccessResponse(
         res,
@@ -20,15 +23,68 @@ routes.get("/get-chain", (req, res) => {
     );
 });
 
-routes.get("/get-price", (req, res) => {
+/**
+ * Returns the raw data of a block.
+ */
+routes.get("/get-block", (req, res) => {
+    try {
+        const index = parseInt(req.query.index as string, 10);
+        ApiHelper.sendSuccessResponse(res, App.blockchain.blocks[index].serialize());
+    }
+    catch (e) {
+        ApiHelper.sendErrorResponse(res, e.message);
+    }
+});
+
+/**
+ * Returns prices of an item across all stores.
+ */
+routes.get("/get-item-prices", (req, res) => {
     const sku = req.query.sku as string;
+    const from = Utils.tryParseInt(req.query.from as string, Date.now());
+    
+    const prices: Record<string, IApiPriceInfo> = {};
+    const blocks = App.blockchain.blocks;
+    for (let i = blocks.length - 1; i >= 0; i--) {
+        const block = blocks[i];
+        if (block.timestamp > from) {
+            continue;
+        }
+
+        for (const userAddr of Object.keys(block.states)) {
+            // If the price has been retrieved for this user, just continue.
+            if (prices[userAddr] !== undefined) {
+                continue;
+            }
+            const priceState = block.states[userAddr].getRulesetState(RulesetIds.price) as PriceState; // eslint-disable-line
+            if (priceState === undefined || priceState === null) {
+                continue;
+            }
+            const price = priceState.getPrice(sku);
+            if (price !== null) {
+                prices[userAddr] = {
+                    basePrice: price.basePrice,
+                    discountRate: price.discountRate,
+                    sku: price.sku,
+                    timestamp: block.timestamp,
+                    userAddress: userAddr
+                };
+            }
+        }
+    }
+    ApiHelper.sendSuccessResponse(res, prices);
+});
+
+/**
+ * Returns the latest prices of all items for a store.
+ */
+routes.get("/get-items", (req, res) => {
     const userAddress = req.query.userAddress as string;
     const from = Utils.tryParseInt(req.query.from as string, Date.now());
     
     const blocks = App.blockchain.blocks;
     for (let i = blocks.length - 1; i >= 0; i--) {
         const block = blocks[i];
-        console.log(`Block timestamp ${block.timestamp} is greater than from ${from}? `, block.timestamp > from);
         if (block.timestamp > from) {
             continue;
         }
@@ -39,22 +95,22 @@ routes.get("/get-price", (req, res) => {
             continue;
         }
         
-        const price = priceState.getPrice(sku);
-        if (price !== null) {
-            const returnData: IApiPriceInfo = {
-                basePrice: price.basePrice,
-                discountRate: price.discountRate,
-                sku: price.sku,
-                timestamp: block.timestamp,
-                userAddress: state?.userAddress as string
-            };
-            ApiHelper.sendSuccessResponse(res, returnData);
-            return;
-        }
+        const prices = Object.values(priceState.prices).map((p): IApiPriceInfo => ({
+            basePrice: p.basePrice,
+            discountRate: p.discountRate,
+            sku: p.sku,
+            timestamp: block.timestamp,
+            userAddress: state?.userAddress as string
+        }));
+        ApiHelper.sendSuccessResponse(res, prices);
+        return;
     }
-    ApiHelper.sendErrorResponse(res, "Could not find price for this item.");
+    ApiHelper.sendErrorResponse(res, "There are no prices registered by this user.");
 });
 
+/**
+ * Returns the history of prices for a specific item in a store.
+ */
 routes.get("/get-price-history", (req, res) => {
     const sku = req.query.sku as string;
     const userAddress = req.query.userAddress as string;
@@ -92,6 +148,9 @@ routes.get("/get-price-history", (req, res) => {
     ApiHelper.sendSuccessResponse(res, prices);
 });
 
+/**
+ * Returns the token balance of an address.
+ */
 routes.get("/get-balance", (req, res) => {
     const userAddress = req.query.userAddress as string;
     
@@ -110,6 +169,9 @@ routes.get("/get-balance", (req, res) => {
     ApiHelper.sendSuccessResponse(res, 0);
 });
 
+/**
+ * Registers new prices for specified items.
+ */
 routes.post("/add-prices", (req, res) => {
     try {
         const param: IApiAddPriceParam = req.body;
@@ -131,6 +193,9 @@ routes.post("/add-prices", (req, res) => {
     }
 });
 
+/**
+ * Sends token to another address.
+ */
 routes.post("/send-token", (req, res) => {
     try {
         const fromAddress = req.body.fromAddress as string;

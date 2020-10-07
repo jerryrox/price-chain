@@ -13,6 +13,13 @@ import IApiPriceInfo from "./models/IApiPriceInfo";
 
 const routes = express.Router();
 
+routes.get("/get-chain", (req, res) => {
+    ApiHelper.sendSuccessResponse(
+        res,
+        App.blockchain.blocks.map((b) => b.serialize())
+    );
+});
+
 routes.get("/get-price", (req, res) => {
     const sku = req.query.sku as string;
     const userAddress = req.query.userAddress as string;

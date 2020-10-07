@@ -50,8 +50,8 @@ describe("ObjectSerializer", () => {
         expect(map.b).toBeUndefined();
         expect(map.c).toBeTruthy();
         expect(map.d).toMatchObject({
-        aa: 0,
-        bb: "fdsa",
+            aa: 0,
+            bb: "fdsa",
         });
         expect(map.myFunc).toBeUndefined();
     });
@@ -65,6 +65,13 @@ describe("ObjectSerializer", () => {
             bb: "fdsa",
         });
         expect(map.myFunc).toBeUndefined();
+
+        const objectWithArray = ObjectSerializer.serialize({
+            arr: ["asdf", "fdsa"]
+        });
+        expect(objectWithArray).toMatchObject({
+            arr: ["asdf", "fdsa"]
+        });
     });
     test("deserialize", () => {
         const dummy = new DummyClass();

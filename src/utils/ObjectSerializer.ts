@@ -30,27 +30,31 @@ class ObjectSerializer {
         const map: Record<string, any> = {};
         names.forEach((name) => {
             if (exclusion === undefined || !exclusion.includes(name)) {
-                // Handling special serialization
-                const value = obj[name];
-                const serializableValue = value as ISerializable;
-                if (!Utils.isNullOrUndefined(serializableValue) &&
-                    serializableValue.serialize !== undefined) {
-                    map[name] = serializableValue.serialize();
-                    return;
-                }
-                // Default serialization.
-                if (Array.isArray(value)) {
-                    map[name] = value.map((v) => this.serialize(v));
-                }
-                else if (typeof (value) === "object") {
-                    map[name] = this.serialize(value);
-                }
-                else {
-                    map[name] = value;
-                }
+                map[name] = this.serializeValue(obj[name]);
             }
         });
         return map;
+    }
+
+    /**
+     * Serializes the specified value to any type appropriate.
+     */
+    serializeValue(value: any): any {
+        // Handling special serialization
+        const serializableValue = value as ISerializable;
+        if (!Utils.isNullOrUndefined(serializableValue) &&
+            serializableValue.serialize !== undefined) {
+            return serializableValue.serialize();
+        }
+        if (typeof (value) !== "string") {
+            if (Array.isArray(value)) {
+                return value.map((v) => this.serializeValue(v));
+            }
+            if (typeof (value) === "object") {
+                return this.serialize(value);
+            }
+        }
+        return value;
     }
 
     /**

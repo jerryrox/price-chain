@@ -105,7 +105,7 @@ routes.get("/get-items", (req, res) => {
         ApiHelper.sendSuccessResponse(res, prices);
         return;
     }
-    ApiHelper.sendErrorResponse(res, "There are no prices registered by this user.");
+    ApiHelper.sendSuccessResponse(res, []);
 });
 
 /**

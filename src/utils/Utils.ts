@@ -26,6 +26,11 @@ class Utils {
   readonly timestampLeniency = 60 * 1000;
 
   /**
+   * Amount of rewarded tokens for mining a new block.
+   */
+  readonly miningReward = 20;
+
+  /**
    * Returns whether the specified value is null or undefined.
    */
   isNullOrUndefined(value: any) {
@@ -46,6 +51,19 @@ class Utils {
       newDate.getUTCSeconds(),
       newDate.getUTCMilliseconds()
     );
+  }
+
+  /**
+   * Tries parsing the specified string as an int.
+   */
+  tryParseInt(value: string, defaultValue: number): number {
+    try {
+      const num = parseInt(value, 10);
+      return Number.isNaN(num) ? defaultValue : num;
+    }
+    catch {
+      return defaultValue;
+    }
   }
 }
 export default new Utils();

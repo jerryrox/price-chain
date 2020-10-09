@@ -40,6 +40,8 @@
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "import/prefer-default-export": "off",
         "operator-linebreak": "off",
-        "no-param-reassign": "off"
+        "no-param-reassign": "off",
+        "no-continue": "off",
+        "no-restricted-syntax": "off"
     }
 }

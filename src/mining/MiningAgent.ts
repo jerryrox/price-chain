@@ -4,6 +4,7 @@ import Utils from "../utils/Utils";
 import StateBuilder from '../states/StateBuilder';
 import Block, { IBlockCalculateHashParam } from '../blockchain/Block';
 import Transaction from '../transactions/Transaction';
+import TokenTransaction from "../transactions/TokenTransaction";
 
 export default class MiningAgent {
 
@@ -11,13 +12,8 @@ export default class MiningAgent {
     readonly pool: TransactionPool;
     readonly miner: string;
 
-    private isAutoMine = false;
-
-    get autoMine(): boolean {
-        return this.isAutoMine;
-    }
-    set autoMine(value: boolean) {
-        this.isAutoMine = value;
+    get hasMiner(): boolean {
+        return this.miner.length > 0;
     }
 
     constructor(blockchain: Blockchain, pool: TransactionPool, miner: string) {
@@ -27,15 +23,23 @@ export default class MiningAgent {
     }
 
     mine(): Block | null {
-        // Forcibly break out if there's nothing to mine.
+        if (!this.hasMiner) {
+            return null;
+        }
+
+        const difficulty = this.blockchain.getCurrentDifficulty();
+        const timestamp = Utils.getTimestamp();
+        const lastBlock = this.blockchain.lastBlock;
+
+        // Pick transactions from the pool and validate them.
         const transactions = this.pool.pickTransactions(Utils.maxTransactionPerBlock);
-        // Ensure validity of the transactions.
         for (let i = transactions.length - 1; i >= 0; i--) {
             if (!transactions[i].isValidStructure()) {
                 transactions.splice(i, 1);
                 this.pool.remove(i);
             }
         }
+        
         // Generate new state
         const stateBuilder = new StateBuilder(this.blockchain);
         // For state generation, we use forward loop even if transactions array may change.
@@ -52,14 +56,23 @@ export default class MiningAgent {
             return null;
         }
 
-        // Mine block
-        const difficulty = this.blockchain.getCurrentDifficulty();
-        const timestamp = Utils.getTimestamp();
-        const lastBlock = this.blockchain.lastBlock;
+        // Feed the reward transaction.
+        const rewardTx = TokenTransaction.newRewardTx(
+            Date.now(), lastBlock.index + 1, this.miner, Utils.miningReward
+        );
+        if (!stateBuilder.feedTransaction(rewardTx)) {
+            console.log("Failed to feed reward transaction to the state.");
+            return null;
+        }
+        transactions.push(rewardTx);
+
+        // Include all transactions to put into the block.
         const txMap: Record<string, Transaction> = {};
         transactions.forEach((tx) => {
             txMap[tx.hash] = tx;
         });
+
+        // Start mining
         const tempBlock: IBlockCalculateHashParam = {
             difficulty,
             index: lastBlock.index + 1,
@@ -72,10 +85,15 @@ export default class MiningAgent {
         };
         while (true) { // eslint-disable-line
             const hash = Block.calculateHash(tempBlock);
-            if (Block.hashMatchesDifficulty(hash, difficulty)) {
-                return new Block(tempBlock);
+            if (!Block.hashMatchesDifficulty(hash, difficulty)) {
+                tempBlock.nonce++;
+                continue;
             }
-            tempBlock.nonce++;
+
+            transactions.forEach((tx) => {
+                this.pool.remove(tx);
+            });
+            return new Block(tempBlock);
         }
     }
 }

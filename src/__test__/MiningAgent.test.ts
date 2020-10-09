@@ -45,4 +45,9 @@ describe("MiningAgent", () => {
 
         console.log(JSON.stringify(blockchain));
     });
+
+    test("Mine without miner", () => {
+        const agent = new MiningAgent(new Blockchain, new TransactionPool(), "");
+        expect(agent.mine()).toBeNull();
+    });
 });

@@ -21,6 +21,20 @@ export default class PriceState extends RulesetState implements IHashable {
         this.prices = param.prices ?? {};
     }
 
+    /**
+     * Returns the price information of specified sku.
+     */
+    getPrice(sku: string): PriceModel | null {
+        return this.prices[sku] ?? null;
+    }
+
+    /**
+     * Returns all prices in this state.
+     */
+    getAllPrices(): PriceModel[] {
+        return Object.values(this.prices);
+    }
+
     clone(): PriceState {
         return new PriceState({
             prices: { ...this.prices }

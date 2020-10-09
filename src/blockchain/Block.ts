@@ -7,6 +7,7 @@ import TokenTransaction from '../transactions/TokenTransaction';
 import ISerializable from "../utils/ISerializable";
 import ObjectSerializer from "../utils/ObjectSerializer";
 import RulesetProvider from "../rulesets/RulesetProvider";
+import Utils from "../utils/Utils";
 
 interface IBlockParam {
     index: number;
@@ -46,13 +47,6 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
      * Dictionary of transactions mapped to their hashes.
      */
     transactions: Record<string, Transaction>;
-
-    /**
-     * Returns the amount of rewards that should be given for mining this block.
-     */
-    get rewardAmount(): number {
-        return 20;
-    }
 
     constructor(param?: IBlockParam) {
         this.index = param?.index ?? 0;
@@ -105,6 +99,35 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
         return hash.startsWith("0".repeat(difficulty));
     }
 
+    /**
+     * Returns the list of reward transactions in the block.
+     */
+    getRewardTransactions(): TokenTransaction[] {
+        const txs = Object.values(this.transactions);
+        const rewards: TokenTransaction[] = [];
+        for (let i = 0; i < txs.length; i++) {
+            const tokenTx = txs[i] as TokenTransaction;
+            if (tokenTx !== null && tokenTx.isReward) {
+                rewards.push(tokenTx);
+            }
+        }
+        return rewards;
+    }
+
+    /**
+     * Returns all states in this block.
+     */
+    getAllStates(): State[] {
+        return Object.values(this.states);
+    }
+
+    /**
+     * Finds and return the state of specified user address.
+     */
+    getStateOfUser(userAddress: string): State | null{
+        return this.states[userAddress] ?? null;
+    }
+
     isValidStructure() {
         // Just making sure here that all the cached hash values can be reproduced correctly.
         const stateMR = CryptoUtils.getMerkleRootForHashable(Object.values(this.states));
@@ -145,6 +168,26 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
         return true;
     }
 
+    /**
+     * Verifies that the reward transaction has been included correctly.
+     * This should only be called for non-genesis block.
+     * Returns whether the verification is successful.
+     */
+    hasValidReward() {
+        const rewards = this.getRewardTransactions();
+        // There must only be one reward transaction,
+        // and it mustn't be the only transaction in the block.
+        if (rewards.length !== 1 || Object.keys(this.transactions).length <= 1) {
+            return false;
+        }
+        const tx = rewards[0];
+        if (tx.rewardRefBlock !== this.index ||
+            tx.amount !== Utils.miningReward) {
+            return false;
+        }
+        return true;
+    }
+
     getHash(): string {
         return Block.calculateHash({
             index: this.index,
@@ -156,21 +199,6 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
             stateMerkleRoot: this.stateMerkleRoot,
             txMerkleRoot: this.txMerkleRoot,
         });
-    }
-
-    /**
-     * Returns the transaction which represents the reward for mining the previous block
-     * May return null if doesn't exist.
-     */
-    getRewardTransaction(): TokenTransaction | null {
-        const txs = Object.values(this.transactions);
-        for (let i = 0; i < txs.length; i++) {
-            const tokenTx = txs[i] as TokenTransaction;
-            if (tokenTx !== null && tokenTx.isReward) {
-                return tokenTx;
-            }
-        }
-        return null;
     }
 
     serialize(): Record<string, any> {

@@ -66,7 +66,7 @@ routes.get("/get-item-prices", (req, res) => {
                     basePrice: price.basePrice,
                     discountRate: price.discountRate,
                     sku: price.sku,
-                    timestamp: block.timestamp,
+                    timestamp: price.timestamp,
                     userAddress: userAddr
                 };
             }
@@ -99,7 +99,7 @@ routes.get("/get-items", (req, res) => {
             basePrice: p.basePrice,
             discountRate: p.discountRate,
             sku: p.sku,
-            timestamp: block.timestamp,
+            timestamp: p.timestamp,
             userAddress: state?.userAddress as string
         }));
         ApiHelper.sendSuccessResponse(res, prices);
@@ -140,7 +140,7 @@ routes.get("/get-price-history", (req, res) => {
                 basePrice: price.basePrice,
                 discountRate: price.discountRate,
                 sku: price.sku,
-                timestamp: block.timestamp,
+                timestamp: price.timestamp,
                 userAddress: state?.userAddress as string
             });
         }

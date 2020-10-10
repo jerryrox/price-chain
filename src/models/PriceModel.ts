@@ -15,6 +15,7 @@ export default class PriceModel implements IHashable, ISerializable, IHasStructu
     basePrice: number;
     discountRate: number;
     sku: string;
+    timestamp: number;
 
     /**
      * Returns the final price calculated by basePrice * (1 - discountRate).
@@ -24,10 +25,16 @@ export default class PriceModel implements IHashable, ISerializable, IHasStructu
     }
 
 
-    constructor(param?: IPriceModelParam) {
+    constructor(timestamp: number, param?: IPriceModelParam) {
+        if (arguments.length === 1 && typeof (arguments[0]) !== "number") {
+            param = arguments[0];
+            timestamp = arguments[0].timestamp;
+        }
+
         this.basePrice = param?.basePrice ?? 0;
         this.discountRate = param?.discountRate ?? 0;
         this.sku = param?.sku ?? "";
+        this.timestamp = timestamp;
     }
 
     isValidStructure(): boolean {
@@ -40,11 +47,14 @@ export default class PriceModel implements IHashable, ISerializable, IHasStructu
         if (this.sku.length === 0) {
             return false;
         }
+        if (this.timestamp <= 0) {
+            return false;
+        }
         return true;
     }
 
     getHash(): string {
-        const dataString = `${this.basePrice}${this.discountRate}${this.sku}`;
+        const dataString = `${this.basePrice}${this.discountRate}${this.sku}${this.timestamp}`;
         return CryptoUtils.getHash(dataString);
     }
 

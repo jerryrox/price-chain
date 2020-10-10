@@ -1,5 +1,5 @@
 import express from "express";
-import App from "../App";
+import app from "../app";
 import PriceModel from "../models/PriceModel";
 import RulesetIds from "../rulesets/RulesetIds";
 import PriceState from "../states/PriceState";
@@ -19,7 +19,7 @@ const routes = express.Router();
 routes.get("/get-chain", (req, res) => {
     ApiHelper.sendSuccessResponse(
         res,
-        App.blockchain.blocks.map((b) => b.serialize())
+        app.blockchain.blocks.map((b) => b.serialize())
     );
 });
 
@@ -29,7 +29,7 @@ routes.get("/get-chain", (req, res) => {
 routes.get("/get-block", (req, res) => {
     try {
         const index = parseInt(req.query.index as string, 10);
-        ApiHelper.sendSuccessResponse(res, App.blockchain.blocks[index].serialize());
+        ApiHelper.sendSuccessResponse(res, app.blockchain.blocks[index].serialize());
     }
     catch (e) {
         ApiHelper.sendErrorResponse(res, e.message);
@@ -44,7 +44,7 @@ routes.get("/get-item-prices", (req, res) => {
     const from = Utils.tryParseInt(req.query.from as string, Date.now());
     
     const prices: Record<string, IApiPriceInfo> = {};
-    const blocks = App.blockchain.blocks;
+    const blocks = app.blockchain.blocks;
     for (let i = blocks.length - 1; i >= 0; i--) {
         const block = blocks[i];
         if (block.timestamp > from) {
@@ -66,7 +66,7 @@ routes.get("/get-item-prices", (req, res) => {
                     basePrice: price.basePrice,
                     discountRate: price.discountRate,
                     sku: price.sku,
-                    timestamp: block.timestamp,
+                    timestamp: price.timestamp,
                     userAddress: userAddr
                 };
             }
@@ -82,7 +82,7 @@ routes.get("/get-items", (req, res) => {
     const userAddress = req.query.userAddress as string;
     const from = Utils.tryParseInt(req.query.from as string, Date.now());
     
-    const blocks = App.blockchain.blocks;
+    const blocks = app.blockchain.blocks;
     for (let i = blocks.length - 1; i >= 0; i--) {
         const block = blocks[i];
         if (block.timestamp > from) {
@@ -99,7 +99,7 @@ routes.get("/get-items", (req, res) => {
             basePrice: p.basePrice,
             discountRate: p.discountRate,
             sku: p.sku,
-            timestamp: block.timestamp,
+            timestamp: p.timestamp,
             userAddress: state?.userAddress as string
         }));
         ApiHelper.sendSuccessResponse(res, prices);
@@ -117,7 +117,7 @@ routes.get("/get-price-history", (req, res) => {
     const from = Utils.tryParseInt(req.query.from as string, 0);
     const to = Utils.tryParseInt(req.query.to as string, Date.now());
     
-    const blocks = App.blockchain.blocks;
+    const blocks = app.blockchain.blocks;
     const prices: IApiPriceInfo[] = [];
     for (let i = 0; i < blocks.length; i++) {
         const block = blocks[i];
@@ -140,7 +140,7 @@ routes.get("/get-price-history", (req, res) => {
                 basePrice: price.basePrice,
                 discountRate: price.discountRate,
                 sku: price.sku,
-                timestamp: block.timestamp,
+                timestamp: price.timestamp,
                 userAddress: state?.userAddress as string
             });
         }
@@ -154,7 +154,7 @@ routes.get("/get-price-history", (req, res) => {
 routes.get("/get-balance", (req, res) => {
     const userAddress = req.query.userAddress as string;
     
-    const blocks = App.blockchain.blocks;
+    const blocks = app.blockchain.blocks;
     for (let i = blocks.length - 1; i >= 0; i--) {
         const block = blocks[i];
         const state = block.getStateOfUser(userAddress);
@@ -179,13 +179,13 @@ routes.post("/add-prices", (req, res) => {
             timestamp: Date.now(),
             fromAddress: param.userAddress,
             rulesetId: RulesetIds.price,
-            data: param.prices.map((p) => new PriceModel({
+            data: param.prices.map((p) => new PriceModel(Date.now(), {
                 basePrice: p.basePrice,
                 discountRate: p.discountRate,
-                sku: p.sku
+                sku: p.sku,
             }))
         });
-        App.transactionPool.add(priceTransaction);
+        app.transactionPool.add(priceTransaction);
         ApiHelper.sendSuccessResponse(res);
     }
     catch (e) {
@@ -212,7 +212,7 @@ routes.post("/send-token", (req, res) => {
             rulesetId: RulesetIds.token,
             data: TokenTransaction.newData(toAddress, amount),
         });
-        App.transactionPool.add(tx);
+        app.transactionPool.add(tx);
         ApiHelper.sendSuccessResponse(res);
     }
     catch (e) {

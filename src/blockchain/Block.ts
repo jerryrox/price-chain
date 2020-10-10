@@ -132,10 +132,12 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
         // Just making sure here that all the cached hash values can be reproduced correctly.
         const stateMR = CryptoUtils.getMerkleRootForHashable(Object.values(this.states));
         if (this.stateMerkleRoot !== stateMR) {
+            // console.log("Block A");
             return false;
         }
         const txMR = CryptoUtils.getMerkleRootForHashable(Object.values(this.transactions));
         if (this.txMerkleRoot !== txMR) {
+            // console.log("Block B");
             return false;
         }
         // States & Transactions key/value mapping and values shouldn't be tampered.
@@ -143,9 +145,11 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
         for (let i = 0; i < stateKeys.length; i++) {
             const key = stateKeys[i];
             if (key !== this.states[key].userAddress) {
+                // console.log("Block C");
                 return false;
             }
             if (!this.states[key].isValidStructure()) {
+                // console.log("Block D");
                 return false;
             }
         }
@@ -153,16 +157,20 @@ export default class Block implements IHashable, ISerializable, IHasStructure {
         for (let i = 0; i < txKeys.length; i++) {
             const key = txKeys[i];
             if (key !== this.transactions[key].hash) {
+                // console.log("Block E");
                 return false;
             }
             if (!this.transactions[key].isValidStructure()) {
+                // console.log("Block F");
                 return false;
             }
         }
         if (this.hash !== this.getHash()) {
+            // console.log("Block G");
             return false;
         }
         if (!Block.hashMatchesDifficulty(this.hash, this.difficulty)) {
+            // console.log("Block H");
             return false;
         }
         return true;

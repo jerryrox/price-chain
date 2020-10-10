@@ -15,7 +15,7 @@ export default class Blockchain implements IHasStructure {
         rulesetId: RulesetIds.price,
         fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
         data: [
-            new PriceModel({
+            new PriceModel(1410955800000, {
                 sku: "4549767092386",
                 basePrice: 19.05,
                 discountRate: 0,
@@ -27,7 +27,7 @@ export default class Blockchain implements IHasStructure {
         minerAddress: "",
         difficulty: 1,
         index: 0,
-        nonce: 5,
+        nonce: 26,
         previousHash: "",
         timestamp: 1410955800000,
         transactions: {
@@ -42,7 +42,7 @@ export default class Blockchain implements IHasStructure {
                     }),
                     [RulesetIds.price]: new PriceState({
                         prices: {
-                            "4549767092386": new PriceModel({ // eslint-disable-line
+                            "4549767092386": new PriceModel(1410955800000, { // eslint-disable-line
                                 sku: "4549767092386",
                                 basePrice: 19.05,
                                 discountRate: 0,
@@ -79,28 +79,38 @@ export default class Blockchain implements IHasStructure {
      */
     static isValidChain(block: Block, prevBlock: Block): boolean {
         if (!block.isValidStructure()) {
+            // console.log("A");
             return false;
         }
         if (!prevBlock.isValidStructure()) {
+            // console.log("B");
             return false;
         }
         if (Math.abs(prevBlock.difficulty - block.difficulty) > 1) {
+            // console.log("C");
             return false;
         }
         if (block.index - 1 !== prevBlock.index) {
+            // console.log("D");
             return false;
         }
         if (block.previousHash !== prevBlock.hash) {
+            // console.log("E");
             return false;
         }
         // If timestamp out-of-sync by more than the leniency, it should be invalid.
         if ((block.timestamp < prevBlock.timestamp - Utils.timestampLeniency) ||
             (Utils.getTimestamp() < block.timestamp - Utils.timestampLeniency)) {
+                // console.log("F");
             return false;
         }
         // A miner address must be present if not the genesis block.
         if (prevBlock.index !== Blockchain.genesisBlock.index &&
             prevBlock.minerAddress.length === 0) {
+            // console.log("G");
+            return false;
+        }
+        if (!block.hasValidReward()) {
             return false;
         }
         return true;
@@ -116,9 +126,6 @@ export default class Blockchain implements IHasStructure {
             const curBlock = this.blocks[i];
             const prevBlock = this.blocks[i - 1];
             if (!Blockchain.isValidChain(curBlock, prevBlock)) {
-                return false;
-            }
-            if (!curBlock.hasValidReward()) {
                 return false;
             }
             if (curBlock.difficulty !== this.calculateDifficulty(curBlock.index)) {

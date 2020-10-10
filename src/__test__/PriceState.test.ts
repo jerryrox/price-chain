@@ -4,10 +4,10 @@ describe("PriceState", () => {
     test("clone", () => {
         const priceState = new PriceState({
             prices: {
-                "asdf": new PriceModel({
+                "asdf": new PriceModel(Date.now(), {
                     basePrice: 1,
                     discountRate: 0.5,
-                    sku: "asdf"
+                    sku: "asdf",
                 })
             }
         });

@@ -1,7 +1,3 @@
-import PriceTransaction from '../transactions/PriceTransaction';
-import RulesetProvider from "../rulesets/RulesetProvider";
-import PriceModel from '../models/PriceModel';
-import Blockchain from '../blockchain/Blockchain';
 describe("Tests for general code", () => {
     test("Overriding toString() and use in template literal", () => {
         class Dummy {

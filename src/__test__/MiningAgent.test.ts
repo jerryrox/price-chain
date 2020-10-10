@@ -21,10 +21,10 @@ describe("MiningAgent", () => {
                 fromAddress: user,
                 rulesetId: RulesetIds.price,
                 data: [
-                    new PriceModel({
+                    new PriceModel(Date.now(), {
                         basePrice: 1.99,
                         discountRate: 0,
-                        sku: "1234"
+                        sku: "1234",
                     })
                 ]
             }),

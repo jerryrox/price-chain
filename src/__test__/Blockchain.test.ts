@@ -1,6 +1,5 @@
 import Blockchain from '../blockchain/Blockchain';
 import Block from '../blockchain/Block';
-import RulesetProvider from "../rulesets/RulesetProvider";
 import TestUtils from "./TestUtils";
 import TokenTransaction from '../transactions/TokenTransaction';
 import Utils from "../utils/Utils";
@@ -11,8 +10,12 @@ describe("Blockchain", () => {
         console.log("Genesis Price Transaction", Blockchain.genesisTransaction.getHash());
         console.log("Genesis block hash", Blockchain.genesisBlock.getHash());
         console.log("Genesis block", Blockchain.genesisBlock);
-        expect(Blockchain.genesisBlock.isValidStructure());
-        expect(Blockchain.genesisBlock.getHash()).toBe("0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca");
+        if (!Blockchain.genesisBlock.isValidStructure()) {
+            TestUtils.mine(Blockchain.genesisBlock);
+        }
+
+        expect(Blockchain.genesisBlock.isValidStructure()).toBeTruthy();
+        expect(Blockchain.genesisBlock.getHash()).toBe("05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370");
     });
     
     test("Instantiation", () => {
@@ -120,15 +123,30 @@ describe("Blockchain", () => {
     });
 
     test("isValidChain", () => {
-        expect(Blockchain.isValidChain(new Block({
+        const tokenTx = new TokenTransaction({
+            fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            rulesetId: RulesetIds.token,
+            timestamp: Date.now(),
+            data: TokenTransaction.newData("asdf", 100)
+        });
+        const reward = TokenTransaction.newRewardTx(
+            Date.now(),
+            1,
+            "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            Utils.miningReward
+        );
+        expect(Blockchain.isValidChain(TestUtils.mine({
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 24,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            nonce: 0,
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
-            transactions: {},
+            transactions: {
+                [tokenTx.hash]: tokenTx,
+                [reward.hash]: reward
+            },
         }), Blockchain.genesisBlock)).toBeTruthy();
 
         expect(Blockchain.isValidChain(new Block({
@@ -136,7 +154,7 @@ describe("Blockchain", () => {
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
             nonce: 24,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180113,
             transactions: {},
@@ -146,7 +164,7 @@ describe("Blockchain", () => {
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
             nonce: 24,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -166,7 +184,7 @@ describe("Blockchain", () => {
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
             nonce: 9999,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -176,7 +194,7 @@ describe("Blockchain", () => {
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8d",
             nonce: 24,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -186,7 +204,7 @@ describe("Blockchain", () => {
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
             nonce: 24,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
             transactions: {},
@@ -194,15 +212,30 @@ describe("Blockchain", () => {
     });
 
     test("isValidChain with two additional blocks", () => {
-        const newBlock = new Block({
+        const tokenTx = new TokenTransaction({
+            fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            rulesetId: RulesetIds.token,
+            timestamp: Date.now(),
+            data: TokenTransaction.newData("asdf", 100)
+        });
+        const reward = TokenTransaction.newRewardTx(
+            Date.now(),
+            1,
+            "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            Utils.miningReward
+        );
+        const newBlock = TestUtils.mine({
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 36,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            nonce: 0,
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
-            transactions: {},
+            transactions: {
+                [tokenTx.hash]: tokenTx,
+                [reward.hash]: reward
+            },
         });
         expect(Blockchain.isValidChain(newBlock, Blockchain.genesisBlock)).toBeTruthy();
 
@@ -215,16 +248,17 @@ describe("Blockchain", () => {
                 Utils.miningReward
             ]
         });
-        let newBlock2 = new Block({
+        let newBlock2 = TestUtils.mine({
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 19,
+            nonce: 0,
             previousHash: newBlock.hash,
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                [fakeRewardTx.hash]: fakeRewardTx
+                [fakeRewardTx.hash]: fakeRewardTx,
+                [tokenTx.hash]: tokenTx,
             },
         });
         // Fails due to invalid reward transaction
@@ -233,22 +267,23 @@ describe("Blockchain", () => {
         const fakeRewardTx2 = new TokenTransaction({
             timestamp: 0,
             rulesetId: RulesetIds.token,
-            fromAddress: "2",
+            fromAddress: "1",
             data: [
                 "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
                 Utils.miningReward
             ]
         });
-        newBlock2 = new Block({
+        newBlock2 = TestUtils.mine({
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 19,
+            nonce: 0,
             previousHash: newBlock.hash,
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                [fakeRewardTx2.hash]: fakeRewardTx2
+                [fakeRewardTx2.hash]: fakeRewardTx2,
+                [tokenTx.hash]: tokenTx,
             },
         });
         // Fails due to invalid reward transaction
@@ -263,31 +298,39 @@ describe("Blockchain", () => {
                 Utils.miningReward
             ]
         });
-        newBlock2 = new Block({
+        newBlock2 = TestUtils.mine({
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 19,
+            nonce: 0,
             previousHash: newBlock.hash,
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                [`${rewardTx.hash}a`]: rewardTx
+                [`${rewardTx.hash}a`]: rewardTx,
+                [tokenTx.hash]: tokenTx,
             },
         });
         // Slightly changed key in transactions.
         expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeFalsy();
 
-        newBlock2 = new Block({
+        const newReward = TokenTransaction.newRewardTx(
+            Date.now(),
+            2,
+            "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            Utils.miningReward
+        );
+        newBlock2 = TestUtils.mine({
             difficulty: 1,
             index: 2,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 19,
+            nonce: 0,
             previousHash: newBlock.hash,
             states: {},
             timestamp: 1598156580112,
             transactions: {
-                [rewardTx.hash]: rewardTx
+                [newReward.hash]: newReward,
+                [tokenTx.hash]: tokenTx,
             },
         });
         expect(Blockchain.isValidChain(newBlock2, newBlock)).toBeTruthy();
@@ -295,15 +338,25 @@ describe("Blockchain", () => {
 
     test("addNewBlock", () => {
         const blockchain = new Blockchain();
-        const newBlock = new Block({
+        const tokenTransaction = new TokenTransaction({
+            timestamp: Date.now(),
+            fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+            rulesetId: RulesetIds.token,
+            data: TokenTransaction.newData("asdf", 100),
+        });
+        const reward = TokenTransaction.newRewardTx(Date.now(), 1, "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c", Utils.miningReward);
+        const newBlock = TestUtils.mine({
             difficulty: 1,
             index: 1,
             minerAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
-            nonce: 24,
-            previousHash: "0443001ea3c0231d9441de71467176f63eb70b05f1380bf12d473d4622dd5cca",
+            nonce: 0,
+            previousHash: "05a429dd639d77483c5ad17dd52399520d32c41da1b0fbb25a3dd06426cb7370",
             states: {},
             timestamp: 1598156180112,
-            transactions: {},
+            transactions: {
+                [tokenTransaction.hash]: tokenTransaction,
+                [reward.hash]: reward
+            },
         });
         expect(blockchain.addNewBlock(newBlock)).toBeTruthy();
         expect(blockchain.blocks.length).toBe(2);
@@ -314,6 +367,21 @@ describe("Blockchain", () => {
         let blockchain = new Blockchain();
 
         const createBlock = (timestamp: number): Block => {
+            const tokenTx = new TokenTransaction({
+                data: TokenTransaction.newData(
+                    "asdf",
+                    100
+                ),
+                fromAddress: "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                rulesetId: RulesetIds.token,
+                timestamp: Date.now(),
+            });
+            const reward = TokenTransaction.newRewardTx(
+                Date.now(),
+                blockchain.lastBlock.index + 1,
+                "02ec78b6f513f5a9eb3bc308ae670e1bbe35485fec151b32b602073fa0db31ef8c",
+                Utils.miningReward
+            );
             const blockData = {
                 difficulty: blockchain.getCurrentDifficulty(),
                 index: blockchain.lastBlock.index + 1,
@@ -322,7 +390,10 @@ describe("Blockchain", () => {
                 previousHash: blockchain.lastBlock.hash,
                 states: {},
                 timestamp,
-                transactions: {},
+                transactions: {
+                    [tokenTx.hash]: tokenTx,
+                    [reward.hash]: reward,
+                },
             }
             const block = TestUtils.mine(blockData, false);
             expect(blockchain.addNewBlock(block)).toBeTruthy();

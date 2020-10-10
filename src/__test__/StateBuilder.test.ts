@@ -19,10 +19,10 @@ describe("StateBuilder", () => {
             fromAddress: userAddr,
             rulesetId: RulesetIds.price,
             data: [
-                new PriceModel({
+                new PriceModel(Date.now(), {
                     basePrice: 1.99,
                     discountRate: 0,
-                    sku: "1234"
+                    sku: "1234",
                 })
             ]
         }))).toBeTruthy();
@@ -70,10 +70,10 @@ describe("StateBuilder", () => {
                 fromAddress: userAddr,
                 rulesetId: RulesetIds.price,
                 data: [
-                    new PriceModel({
+                    new PriceModel(Date.now(), {
                         basePrice: 1.99,
                         discountRate: 0,
-                        sku: "1234"
+                        sku: "1234",
                     })
                 ]
             }),
@@ -82,12 +82,19 @@ describe("StateBuilder", () => {
                 fromAddress: userAddr,
                 rulesetId: RulesetIds.token,
                 data: ["0x0", 1]
-            })
+            }),
+            TokenTransaction.newRewardTx(
+                Date.now(),
+                Blockchain.genesisBlock.index + 1,
+                userAddr,
+                Utils.miningReward
+            ),
         ];
 
         let stateBuilder = new StateBuilder(blockchain);
-        expect(stateBuilder.feedTransaction(transactions[0])).toBeTruthy();
-        expect(stateBuilder.feedTransaction(transactions[1])).toBeTruthy();
+        transactions.forEach((tx) => {
+            expect(stateBuilder.feedTransaction(tx)).toBeTruthy();
+        });
 
         const block = TestUtils.mine({
             difficulty: blockchain.getCurrentDifficulty(),
@@ -95,14 +102,14 @@ describe("StateBuilder", () => {
             minerAddress: userAddr,
             nonce: 0,
             previousHash: blockchain.lastBlock.hash,
-            timestamp: blockchain.lastBlock.timestamp,
+            timestamp: blockchain.lastBlock.timestamp + 1,
             transactions: {
                 [transactions[0].hash]: transactions[0],
                 [transactions[1].hash]: transactions[1],
+                [transactions[2].hash]: transactions[2],
             },
             states: stateBuilder.newState
         });
-        console.log(block);
         expect(blockchain.addNewBlock(block)).toBeTruthy();
 
         stateBuilder = new StateBuilder(blockchain, block.index);
@@ -119,21 +126,28 @@ describe("StateBuilder", () => {
 
         const transactions = [
             new PriceTransaction({
-                timestamp: Blockchain.genesisBlock.timestamp,
+                timestamp: Date.now(),
                 fromAddress: userAddr,
                 rulesetId: RulesetIds.price,
                 data: [
-                    new PriceModel({
+                    new PriceModel(Date.now(), {
                         basePrice: 25.5,
                         discountRate: 0.5,
-                        sku: "4549767092386"
+                        sku: "4549767092386",
                     })
                 ]
             }),
+            TokenTransaction.newRewardTx(
+                Date.now(),
+                blockchain.lastBlock.index + 1,
+                userAddr,
+                Utils.miningReward
+            ),
         ];
 
         let stateBuilder = new StateBuilder(blockchain);
         expect(stateBuilder.feedTransaction(transactions[0])).toBeTruthy();
+        expect(stateBuilder.feedTransaction(transactions[1])).toBeTruthy();
 
         const block = TestUtils.mine({
             difficulty: blockchain.getCurrentDifficulty(),
@@ -144,6 +158,7 @@ describe("StateBuilder", () => {
             timestamp: blockchain.lastBlock.timestamp,
             transactions: {
                 [transactions[0].hash]: transactions[0],
+                [transactions[1].hash]: transactions[1],
             },
             states: stateBuilder.newState
         });

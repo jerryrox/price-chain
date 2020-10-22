@@ -6,6 +6,7 @@ import PriceState from "../states/PriceState";
 import TokenState from "../states/TokenState";
 import PriceTransaction from "../transactions/PriceTransaction";
 import TokenTransaction from "../transactions/TokenTransaction";
+import CryptoUtils from "../utils/CryptoUtils";
 import Utils from "../utils/Utils";
 import ApiHelper from "./helpers/ApiHelper";
 import IApiAddPriceParam from "./models/IApiAddPriceParam";
@@ -167,6 +168,13 @@ routes.get("/get-balance", (req, res) => {
         return;
     }
     ApiHelper.sendSuccessResponse(res, 0);
+});
+
+/**
+ * Retrieves a new pair of public/private address.
+ */
+routes.get("/get-new-address", (req, res) => {
+    ApiHelper.sendSuccessResponse(res, CryptoUtils.generateKeyPair());
 });
 
 /**
